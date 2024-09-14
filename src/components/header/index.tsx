@@ -44,7 +44,7 @@ type Props = {
 	user: any
 }
 
-const socket = io('http://localhost:5000');
+const socket = io('http://31.128.39.245:5000');
 
 const Header = ({ user }: Props) => {
 	const navigate = useNavigate();

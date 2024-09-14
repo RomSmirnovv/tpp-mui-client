@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { setUser } from '../features/userSlice';
 import { IUser } from './types';
 
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = 'http://31.128.39.245:5000';
 
 export const userApi = createApi({
 	reducerPath: 'userApi',

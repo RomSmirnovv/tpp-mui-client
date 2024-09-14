@@ -3,7 +3,7 @@ import { IGenericResponse, IToken, IUser } from './types';
 import { userApi } from './userApi';
 import { setUser } from '../features/userSlice';
 
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = 'http://31.128.39.245:5000';
 
 export const authApi = createApi({
 	reducerPath: 'authApi',

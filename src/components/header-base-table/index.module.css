@@ -1,0 +1,20 @@
+.toggle__button svg {
+	opacity: 0;
+	z-index: 1;
+}
+
+.toggle__button:hover svg {
+	opacity: 1;
+}
+
+.toggle__button {
+	position: relative;
+	padding-left: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-right: 5px;
+}
+
+.toggle__button span {
+	padding: 5px 10px;
+}

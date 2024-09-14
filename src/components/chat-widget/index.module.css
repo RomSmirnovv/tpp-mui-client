@@ -1,0 +1,29 @@
+.chat__messages {
+	height: 466px;
+	overflow-y: scroll;
+}
+
+.chat__form {
+	padding-top: 15px;
+	box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.3);
+}
+
+.message__right {
+	background-color: #e7e7e7;
+	border-radius: 5px;
+	padding: 10px;
+	margin: 10px;
+	font-size: 14px;
+	text-align: right;
+	margin-left: 65px;
+}
+
+.message__left {
+	background-color: #e7e7e7;
+	border-radius: 5px;
+	padding: 10px;
+	margin: 10px;
+	font-size: 14px;
+	text-align: left;
+	margin-right: 65px;
+}

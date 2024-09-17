@@ -32,8 +32,8 @@ const NotificationItem = ({ notification }: Props) => {
 						<Typography textAlign="left"><b>{notification.notificationDate}</b></Typography>
 						<Typography textAlign="left" sx={{ fontWeight: 'light', fontSize: '14px', fontStyle: 'italic' }}>{notification.notificationTime}</Typography>
 					</Box>
-					<Box sx={{ p: 1, textAlign: 'left' }}>
-						<Typography textAlign="left">{notification.message}</Typography>
+					<Box sx={{ p: 1, textAlign: 'left', width: '300px' }}>
+						<Typography sx={{ fontSize: '0.9rem', lineHeight: '1.3', display: 'blovk', textWrap: 'wrap', marginBottom: '5px' }} textAlign="left">{notification.message}</Typography>
 						<Typography textAlign="left" sx={{ fontSize: '14px', textDecoration: 'underline', cursor: 'pointer' }} onClick={hadleOpenCompany} >Открыть запись</Typography>
 					</Box>
 				</Box>

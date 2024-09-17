@@ -13,7 +13,7 @@ import Messages from './messages';
 import Rooms from './rooms/index.tsx';
 import SendMessage from './sendMessage/index.tsx';
 
-const socketChat = io('http://31.128.39.245:5000');
+const socketChat = io('http://5.35.85.172:5000');
 
 type Props = {
 	user: IUser

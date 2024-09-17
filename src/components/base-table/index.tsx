@@ -9,6 +9,7 @@ import { ruRU } from '@mui/x-data-grid/locales';
 import { Button } from '@mui/material';
 import CompanyRowSettings from '../company-row-settings';
 import CompanyRowColors from '../company-row-colors';
+import moment from 'moment'
 
 const rows = [
 	{ id: 1, name: 'Snow', preson: 'Jon', note: 35 },
@@ -105,6 +106,11 @@ const BaseTable = ({ user }: Props) => {
 	}
 
 	const processRowUpdate = async (newRow: any, oldRow: any) => {
+		console.log(oldRow)
+		console.log(newRow)
+		if (oldRow.requirement != newRow.requirement || oldRow.offer != newRow.offer || oldRow.note != newRow.note) {
+			newRow.updateDate = moment().format('YYYY-MM-DD HH:MM:ss')
+		}
 		try {
 			await editCompany(newRow).unwrap();
 			return newRow;
@@ -135,7 +141,7 @@ const BaseTable = ({ user }: Props) => {
 			setInitialColumns(formatInitialColumns(currentList?.columns))
 		}
 		if (isCompaniesSuccess) {
-			let companiesData = companies.filter((com) => com.listName === selectedList?.name).map((company) => {
+			let companiesData = companies.filter((com) => com.listName === selectedList?.name).sort((a, b) => a.updateDate < b.updateDate ? 1 : -1).map((company) => {
 				return { ...company, id: company._id }
 			})
 			setCompanyes(companiesData)

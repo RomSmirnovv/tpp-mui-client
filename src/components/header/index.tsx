@@ -44,7 +44,7 @@ type Props = {
 	user: any
 }
 
-const socket = io('http://31.128.39.245:5000');
+const socket = io('http://5.35.85.172:5000');
 
 const Header = ({ user }: Props) => {
 	const navigate = useNavigate();
@@ -244,9 +244,11 @@ const Header = ({ user }: Props) => {
 							open={Boolean(anchorElNotification)}
 							onClose={handleCloseNotificationMenu}
 						>
-							{notificationData && notificationData.map((notification: INotification) => (
-								<NotificationItem key={notification._id} notification={notification} />
-							))}
+							{notificationData && notificationData
+								.sort((a, b) => a.notificationDateTime < b.notificationDateTime ? 1 : -1)
+								.map((notification: INotification) => (
+									<NotificationItem key={notification._id} notification={notification} />
+								))}
 							{notificationData && notificationData.length === 0 && <MenuItem><Typography textAlign="center">Нет уведомлений</Typography></MenuItem>}
 						</Menu>
 					</Box>

@@ -1,7 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { INotification, NotificationId, UserId } from './types';
-
-const BASE_URL = 'http://5.35.85.172:5000';
+import { BASE_URL } from '../../config';
 
 export const notificationApi = createApi({
 	reducerPath: 'notificationApi',

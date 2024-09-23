@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Modal, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Link, Modal, TextField, Typography } from '@mui/material';
 import moment from 'moment';
 import { useAddCompanyMutation, useEditCompanyMutation } from '../../redux/api/companyApi';
 import { useGetListByUserQuery, useGetOneListQuery } from '../../redux/api/listApi';
@@ -63,6 +63,7 @@ const EditFileLinkModal = ({ company, open = false, handleClose = () => { } }) =
 					>
 						Сохранить
 					</Button>
+					{company.fileLink != '' ? <Link href={company.fileLink} target="_blank">Перейти</Link> : null}
 					{editCompanyError && <Alert severity="error">
 						{editCompanyError.data.error}
 					</Alert>}

@@ -109,7 +109,7 @@ const HeaderBaseTable = ({ user }: Props) => {
 						disabled={isEditing}
 					>
 						{dataLists && dataLists.map((list) => (
-							<ToggleButton key={list._id} value={list} disabled={list.checked} className={styles.toggle__button}>
+							<ToggleButton key={list._id} value={list} className={styles.toggle__button}>
 
 
 								{list.name != 'Основной' && list.name != 'Корзина' ? (

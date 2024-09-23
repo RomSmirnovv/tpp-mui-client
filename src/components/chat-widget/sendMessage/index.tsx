@@ -20,6 +20,19 @@ const SendMessage = ({ user, socket, activeRoom, setUnreadMessages }) => {
 		socket.emit('send_message', { message });
 	}
 
+	const handleSendMessageOnEnter = async (value) => {
+		if (value === '') return
+		const message = {
+			message: value,
+			userId: user._id,
+			room: activeRoom,
+			fullName: user.name + ' ' + user.surname,
+			dateTime: moment().format('DD.MM.YYYY HH:mm:ss')
+		}
+		setMessageInput('');
+		socket.emit('send_message', { message });
+	}
+
 	return (
 		<Box
 			component="form"
@@ -37,6 +50,12 @@ const SendMessage = ({ user, socket, activeRoom, setUnreadMessages }) => {
 				value={messageInput}
 				onChange={(e) => setMessageInput(e.target.value)}
 				onClick={() => setUnreadMessages(false)}
+				onKeyPress={(ev) => {
+					if (ev.key === 'Enter') {
+						handleSendMessageOnEnter(ev.target.value)
+						ev.preventDefault();
+					}
+				}}
 				rows={3}
 			/>
 			<Button

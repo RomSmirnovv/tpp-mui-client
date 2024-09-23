@@ -10,13 +10,7 @@ import { Button } from '@mui/material';
 import CompanyRowSettings from '../company-row-settings';
 import CompanyRowColors from '../company-row-colors';
 import moment from 'moment'
-
-const rows = [
-	{ id: 1, name: 'Snow', preson: 'Jon', note: 35 },
-	{ id: 2, name: 'Lannister', preson: 'Cersei', note: 42 },
-	{ id: 3, name: 'Lannister', preson: 'Jaime', note: 45 },
-	{ id: 4, name: 'Stark', preson: 'Arya', note: 16 },
-]
+import EditTextarea from '../edit-textarea';
 
 
 const formatInitialColumns = (columns: GridColDef[]) => {
@@ -126,6 +120,14 @@ const BaseTable = ({ user }: Props) => {
 			setSelectedList(currentList);
 			let currentColumns = currentList?.columns || [];
 			let editCurrentColumns = currentColumns.map((column) => {
+				if (column.field === 'note' || column.field === 'person' || column.field === 'phone' || column.field === 'email' || column.field === 'requirement' || column.field === 'offer' || column.field === 'offer') {
+					return {
+						...column,
+						editable: true,
+						type: 'string',
+						renderEditCell: (params: GridRenderCellParams) => <EditTextarea {...params} />,
+					}
+				}
 				if (column.field === 'color') {
 					return {
 						...column,
@@ -173,7 +175,8 @@ const BaseTable = ({ user }: Props) => {
 				onColumnWidthChange={onColumnWidthChanged}
 				processRowUpdate={processRowUpdate}
 				getRowId={(row) => row._id}
-				sx={{ mt: 1, height: '80vh' }}
+				sx={{ mt: 1, mb: 2, height: '75vh', border: '1px solid #e0e0e0' }}
+				getRowClassName={(params) => `row__color__${params.row.color && params.row.color.replace('#', '')}`}
 			/>
 		</>
 	);

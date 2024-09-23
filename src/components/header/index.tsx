@@ -26,6 +26,7 @@ import { useMemo } from 'react';
 import { io } from 'socket.io-client';
 import { Howl, Howler } from "howler";
 import notificationVoice from '../../assets/voices/notification.mp3'
+import { BASE_URL } from '../../config';
 
 
 const getPages = (userRole: number) => {
@@ -44,7 +45,7 @@ type Props = {
 	user: any
 }
 
-const socket = io('http://5.35.85.172:5000');
+const socket = io(BASE_URL);
 
 const Header = ({ user }: Props) => {
 	const navigate = useNavigate();

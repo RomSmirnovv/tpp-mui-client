@@ -12,8 +12,9 @@ import { IUser } from '../../redux/api/types';
 import Messages from './messages';
 import Rooms from './rooms/index.tsx';
 import SendMessage from './sendMessage/index.tsx';
+import { BASE_URL } from '../../config.ts';
 
-const socketChat = io('http://5.35.85.172:5000');
+const socketChat = io(BASE_URL);
 
 type Props = {
 	user: IUser

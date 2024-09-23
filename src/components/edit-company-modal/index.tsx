@@ -81,7 +81,7 @@ const EditCompanyModal = ({ company, open = false, handleClose = () => { } }) =>
 							autoFocus
 						/>
 						{list && list.columns ?
-							list.columns.filter((c) => c.checked === true && c.field != 'name').map((col) => {
+							list.columns.filter((c) => c.checked === true && c.field != 'name' && c.field != 'color').map((col) => {
 								return (
 									<TextField
 										key={col.key}

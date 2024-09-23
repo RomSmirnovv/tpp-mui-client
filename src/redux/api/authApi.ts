@@ -2,8 +2,8 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { IGenericResponse, IToken, IUser } from './types';
 import { userApi } from './userApi';
 import { setUser } from '../features/userSlice';
+import { BASE_URL } from '../../config';
 
-const BASE_URL = 'http://5.35.85.172:5000';
 
 export const authApi = createApi({
 	reducerPath: 'authApi',

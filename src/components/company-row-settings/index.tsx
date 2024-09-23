@@ -16,6 +16,7 @@ import EditListCompany from '../edit-list-company';
 import AddNotificationModal from '../add-notification-modal';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ConfirmRecoveryCompany from '../confirm-recovery-company';
+import moment from 'moment';
 
 type Props = {
 	params: Object
@@ -73,21 +74,22 @@ const CompanyRowSettings = ({ params }: Props) => {
 				</Box>
 				:
 				<>
-					<Box sx={{ display: 'flex' }}>
-						<AccessTimeIcon onClick={handleOpenNotification} sx={{ m: 0.5, fontSize: 18, cursor: 'pointer' }} titleAccess="Добавить уведомление" />
+					<Box sx={{ display: 'flex', mt: 0.5 }}>
+						<AccessTimeIcon onClick={handleOpenNotification} sx={{ m: 0.1, fontSize: 18, cursor: 'pointer' }} titleAccess="Добавить уведомление" />
 						{params.row.favorite ?
-							<StarOutlinedIcon sx={{ m: 0.5, fontSize: 18, cursor: 'pointer', color: '#ceb129' }} titleAccess="Удалить из избранного" onClick={toggleStar} disabled={isEditCompanyLoading} />
+							<StarOutlinedIcon sx={{ m: 0.1, fontSize: 18, cursor: 'pointer', color: '#ceb129' }} titleAccess="Удалить из избранного" onClick={toggleStar} disabled={isEditCompanyLoading} />
 							:
-							<StarOutlineIcon sx={{ m: 0.5, fontSize: 18, cursor: 'pointer' }} titleAccess="В избранное" onClick={toggleStar} disabled={isEditCompanyLoading} />
+							<StarOutlineIcon sx={{ m: 0.1, fontSize: 18, cursor: 'pointer' }} titleAccess="В избранное" onClick={toggleStar} disabled={isEditCompanyLoading} />
 						}
 
-						<AttachFileIcon onClick={handleOpenFileLink} sx={{ m: 0.5, fontSize: 18, cursor: 'pointer' }} titleAccess="Ссылка на файл" />
+						<AttachFileIcon onClick={handleOpenFileLink} sx={{ m: 0.1, fontSize: 18, cursor: 'pointer' }} titleAccess="Ссылка на файл" />
 					</Box>
-					<Box sx={{ display: 'flex' }}>
-						<EditIcon onClick={handleOpenEdit} sx={{ m: 0.5, fontSize: 18, cursor: 'pointer' }} titleAccess="Редактировать запись" />
-						<DeleteOutlineIcon onClick={handleOpenDelete} sx={{ m: 0.5, fontSize: 18, cursor: 'pointer' }} titleAccess="Удалить запись" />
-						<ContentCopyOutlinedIcon onClick={handleOpenEditList} sx={{ m: 0.5, fontSize: 18, cursor: 'pointer' }} titleAccess="Копировать/Перенести в другой лист" />
+					<Box sx={{ display: 'flex', mb: 0.5 }}>
+						<EditIcon onClick={handleOpenEdit} sx={{ m: 0.1, fontSize: 18, cursor: 'pointer' }} titleAccess="Редактировать запись" />
+						<DeleteOutlineIcon onClick={handleOpenDelete} sx={{ m: 0.1, fontSize: 18, cursor: 'pointer' }} titleAccess="Удалить запись" />
+						<ContentCopyOutlinedIcon onClick={handleOpenEditList} sx={{ m: 0.1, fontSize: 18, cursor: 'pointer' }} titleAccess="Копировать/Перенести в другой лист" />
 					</Box>
+					<div style={{ lineHeight: '14px', marginBottom: '3px', fontSize: '12px', fontStyle: 'italic' }}>{moment(params.row.updateDate).format('DD.MM.YYYY HH:mm:ss')}</div>
 				</>
 			}
 			<EditCompanyModal company={params.row} open={openEdit} handleClose={handleCloseEdit} />

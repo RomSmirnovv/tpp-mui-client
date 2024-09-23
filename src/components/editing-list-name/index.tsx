@@ -39,7 +39,6 @@ const EditingListName = ({ editing, setAlertOpen, setAlertMessage, setAlertVaria
 		<>
 			{list._id == selectedEditList && editing ? (<TextField
 				id="standard-basic"
-				label="Standard"
 				variant="standard"
 				onBlur={saveListName}
 				value={value}

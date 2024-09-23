@@ -58,3 +58,33 @@
   height: 35px;
   border-radius: 50%;
 }
+
+.MuiDataGrid-cell,
+.MuiDataGrid-columnHeader {
+  border-left: 0.3px solid #e0e0e0;
+  border-right: 0.3px solid #e0e0e0;
+}
+
+.MuiDataGrid-columnHeaders {
+  border-top: 1px solid #e0e0e0;
+}
+
+.MuiDataGrid-row {
+  max-height: 66px !important;
+}
+
+.MuiDataGrid-cell {
+  height: 66px !important;
+}
+
+.row__color__ef7575 {
+  background-color: #ef757596 !important;
+}
+
+.row__color__ffe51d {
+  background-color: #ffe51d9c !important;
+}
+
+.row__color__84d166 {
+  background-color: #84d166a1 !important;
+}

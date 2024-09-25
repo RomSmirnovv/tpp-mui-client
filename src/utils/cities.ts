@@ -15491,3 +15491,16 @@ export const CITIES = [
 		]
 	}
 ]
+
+export const getCities = (cities) => {
+	let citiesData = []
+	if (cities) {
+		for (let i = 0; i < cities.length; i++) {
+			for (let n = 0; n < cities[i].cities.length; n++) {
+				citiesData.push({ label: `${cities[i].cities[n].name} (${cities[i].cities[n].utc} часа/ов)`, id: Number(i + '' + n), key: Number(i + '' + n) });
+			}
+		}
+	}
+	console.log('citiesData', citiesData)
+	return citiesData;
+}

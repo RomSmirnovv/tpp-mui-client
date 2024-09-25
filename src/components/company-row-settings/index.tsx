@@ -20,9 +20,10 @@ import moment from 'moment';
 
 type Props = {
 	params: Object
+	options: any
 }
 
-const CompanyRowSettings = ({ params }: Props) => {
+const CompanyRowSettings = ({ params, options }: Props) => {
 	const [openEdit, setOpenEdit] = useState(false)
 	const [openRecovery, setOpenRecovery] = useState(false)
 	const [openDelete, setOpenDelete] = useState(false)
@@ -92,7 +93,7 @@ const CompanyRowSettings = ({ params }: Props) => {
 					<div style={{ lineHeight: '14px', marginBottom: '3px', fontSize: '12px', fontStyle: 'italic' }}>{moment(params.row.updateDate).format('DD.MM.YYYY HH:mm:ss')}</div>
 				</>
 			}
-			<EditCompanyModal company={params.row} open={openEdit} handleClose={handleCloseEdit} />
+			<EditCompanyModal options={options} company={params.row} open={openEdit} handleClose={handleCloseEdit} />
 			<DeleteCompanyModal company={params.row} open={openDelete} handleClose={handleCloseDelete} />
 			<EditFileLinkModal company={params.row} open={openFileLink} handleClose={handleCloseFileLink} />
 			<EditListCompany company={params.row} open={openEditList} handleClose={handleCloseEditList} />

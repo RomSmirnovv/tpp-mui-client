@@ -11,6 +11,8 @@ import CompanyRowSettings from '../company-row-settings';
 import CompanyRowColors from '../company-row-colors';
 import moment from 'moment'
 import EditTextarea from '../edit-textarea';
+import { getGridNumericOperators } from '@mui/x-data-grid';
+import { CITIES, getCities } from '../../utils/cities';
 
 
 const formatInitialColumns = (columns: GridColDef[]) => {
@@ -25,6 +27,8 @@ const formatInitialColumns = (columns: GridColDef[]) => {
 
 
 
+const optionsCities = getCities(CITIES)
+
 const renderCell = {
 	key: 9999,
 	field: 'actions',
@@ -32,7 +36,7 @@ const renderCell = {
 	width: 100,
 	hideable: false,
 	checked: true,
-	renderCell: (params: GridRenderCellParams) => <CompanyRowSettings params={params} />,
+	renderCell: (params: GridRenderCellParams) => <CompanyRowSettings options={optionsCities} params={params} />,
 }
 
 
@@ -52,10 +56,10 @@ const BaseTable = ({ user }: Props) => {
 	const { data: companies, isSuccess: isCompaniesSuccess } = useGetCompaniesQuery(user._id);
 	const [editCompany, { isSuccess: isEditCompanySuccess, isLoading: isEditCompanyLoading }] = useEditCompanyMutation();
 
+
 	const localizedTextsMap = {
 		columnsMenuButtonLabel: 'Меню',
 	};
-
 
 	const onColumnVisibilityModelChanged = async (model: GridColumnVisibilityModel) => {
 		const fieldName = Object.keys(model)[0]
@@ -120,6 +124,13 @@ const BaseTable = ({ user }: Props) => {
 			setSelectedList(currentList);
 			let currentColumns = currentList?.columns || [];
 			let editCurrentColumns = currentColumns.map((column) => {
+				if (column.field === 'name') {
+					return {
+						...column,
+						editable: true,
+						renderCell: (params: GridRenderCellParams) => <><div style={{ lineHeight: '30px' }}>{params.value}</div><div style={{ lineHeight: '15px', fontStyle: 'italic', color: 'gray', fontSize: '12px' }}>{params.row.location}</div></>,
+					}
+				}
 				if (column.field === 'note' || column.field === 'person' || column.field === 'phone' || column.field === 'email' || column.field === 'requirement' || column.field === 'offer' || column.field === 'offer') {
 					return {
 						...column,
@@ -131,6 +142,10 @@ const BaseTable = ({ user }: Props) => {
 				if (column.field === 'color') {
 					return {
 						...column,
+						type: 'singleSelect',
+						filterOperators: getGridNumericOperators().filter(
+							(operator) => operator.value === '=',
+						),
 						renderCell: (params: GridRenderCellParams) => <CompanyRowColors params={params} />,
 					}
 				}
@@ -166,7 +181,6 @@ const BaseTable = ({ user }: Props) => {
 						showQuickFilter: true,
 					},
 				}}
-				disableColumnFilter
 				disableDensitySelector
 				loading={isEditing}
 				columnVisibilityModel={initialColumns}

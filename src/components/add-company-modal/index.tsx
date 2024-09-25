@@ -1,8 +1,9 @@
-import { Alert, Box, Button, Modal, TextField, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Modal, TextField, Typography } from '@mui/material';
 import moment from 'moment';
 import { useAddCompanyMutation } from '../../redux/api/companyApi';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AddNotificationModal from '../add-notification-modal';
+import { CITIES, getCities } from '../../utils/cities';
 
 const style = {
 	position: 'absolute' as 'absolute',
@@ -14,6 +15,8 @@ const style = {
 	boxShadow: 24,
 	p: 4,
 };
+
+const options = getCities(CITIES)
 
 const AddCompanyModal = ({ user, list, open = false, handleClose = () => { } }) => {
 	const [addCompany, { error: addCompanyError, isLoading: isAdding, isSuccess: isAdded }] = useAddCompanyMutation();
@@ -37,6 +40,7 @@ const AddCompanyModal = ({ user, list, open = false, handleClose = () => { } }) 
 			list.columns.filter((c) => c.checked === true).map((col) => {
 				newCompany[col.field] = data.get(col.field)
 			})
+			newCompany.location = data.get('location')
 		}
 		try {
 			const { data } = await addCompany(newCompany);
@@ -76,6 +80,12 @@ const AddCompanyModal = ({ user, list, open = false, handleClose = () => { } }) 
 							name='name'
 							autoComplete='name'
 							autoFocus
+						/>
+						<Autocomplete
+							options={options}
+							disableClearable
+							freeSolo={true}
+							renderInput={(params) => <TextField sx={{ mt: 2 }} {...params} name="location" label="Город" />}
 						/>
 						{list && list.columns ?
 							list.columns.filter((c) => c.checked === true && c.field != 'name' && c.field != 'color').map((col) => {

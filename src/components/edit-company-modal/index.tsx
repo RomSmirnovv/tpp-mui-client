@@ -1,10 +1,11 @@
-import { Alert, Box, Button, Modal, TextField, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Modal, TextField, Typography } from '@mui/material';
 import moment from 'moment';
 import { useAddCompanyMutation, useEditCompanyMutation } from '../../redux/api/companyApi';
 import { useGetListByUserQuery, useGetOneListQuery } from '../../redux/api/listApi';
 import { useEffect, useState } from 'react';
 import { IList } from '../../redux/api/types';
 import AddNotificationModal from '../add-notification-modal';
+import { CITIES, getCities } from '../../utils/cities';
 
 const style = {
 	position: 'absolute' as 'absolute',
@@ -17,7 +18,8 @@ const style = {
 	p: 4,
 };
 
-const EditCompanyModal = ({ company, open = false, handleClose = () => { } }) => {
+
+const EditCompanyModal = ({ options, company, open = false, handleClose = () => { } }) => {
 	const [editCompany, { error: editCompanyError, isLoading: isEditCompanyLoading, isSuccess: isEditCompanySuccess }] = useEditCompanyMutation();
 	const [list, setList] = useState<IList>({} as IList);
 	const { data: lists, isSuccess: isListsSuccess, isLoading: isListsLoading } = useGetListByUserQuery(company.userId);
@@ -33,7 +35,9 @@ const EditCompanyModal = ({ company, open = false, handleClose = () => { } }) =>
 			list.columns.filter((c) => c.checked === true).map((col) => {
 				updateCompany[col.field] = data.get(col.field)
 			})
+			updateCompany.location = data.get('location')
 		}
+		console.log('updateCompany', updateCompany)
 		try {
 			const data = await editCompany(updateCompany).unwrap();
 			handleClose();
@@ -79,6 +83,14 @@ const EditCompanyModal = ({ company, open = false, handleClose = () => { } }) =>
 							autoComplete='name'
 							defaultValue={company.name}
 							autoFocus
+						/>
+						<Autocomplete
+							id={`location-${company._id}`}
+							options={options}
+							disableClearable
+							defaultValue={company.location}
+							freeSolo={true}
+							renderInput={(params) => <TextField sx={{ mt: 2 }} {...params} name="location" label="Город" />}
 						/>
 						{list && list.columns ?
 							list.columns.filter((c) => c.checked === true && c.field != 'name' && c.field != 'color').map((col) => {

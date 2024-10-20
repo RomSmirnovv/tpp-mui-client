@@ -82,8 +82,8 @@ const Header = ({ user }: Props) => {
 
 	const handleLogout = async () => {
 		try {
-			await logout().unwrap();
-			navigate("/login");
+			await logout();
+			
 		} catch (error) {
 			const maybeError = isErrorWithMessage(error);
 
@@ -93,6 +93,7 @@ const Header = ({ user }: Props) => {
 				setError("Неизвестная ошибка");
 			}
 		}
+		navigate("/login", { replace: true });	
 	}
 
 	React.useEffect(() => {
@@ -195,25 +196,7 @@ const Header = ({ user }: Props) => {
 								: null}
 						</Menu>
 					</Box>
-					<AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-					<Typography
-						variant="h5"
-						noWrap
-						component="a"
-						href="#app-bar-with-responsive-menu"
-						sx={{
-							mr: 2,
-							display: { xs: 'flex', md: 'none' },
-							flexGrow: 1,
-							fontFamily: 'monospace',
-							fontWeight: 700,
-							letterSpacing: '.3rem',
-							color: 'inherit',
-							textDecoration: 'none',
-						}}
-					>
-						LOGO
-					</Typography>
+					
 					<Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
 						<NavLink to="/" style={{ margin: '10px', color: 'white', display: 'block', fontWeight: '400' }}>База данных</NavLink>
 						{user.role == 2 ?
@@ -276,7 +259,7 @@ const Header = ({ user }: Props) => {
 							open={Boolean(anchorElUser)}
 							onClose={handleCloseUserMenu}
 						>
-							<MenuItem key={settings[0]} onClick={handleLogout}>
+							<MenuItem key={settings[0]}>
 								<NavLink to="/profile" ><Typography textAlign="center">{settings[0]}</Typography></NavLink>
 							</MenuItem>
 							<MenuItem key={settings[1]} onClick={handleLogout}>

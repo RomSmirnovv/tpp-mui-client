@@ -9,13 +9,18 @@ const Home = () => {
 	const currentUser = useAppSelector((state) => state.userState.user) || {};
 	return (
 		<>
-			<Header user={currentUser} />
-			<Container sx={{ my: 3 }} maxWidth="xl">
-				<HeaderBaseTable user={currentUser} />
-				<BaseTable user={currentUser} />
+			{currentUser &&
+				<>
 
-			</Container>
-			<ChatWidget user={currentUser} />
+					<Header user={currentUser} />
+					<Container sx={{ my: 3 }} maxWidth="xl">
+						<HeaderBaseTable user={currentUser} />
+						<BaseTable user={currentUser} />
+
+					</Container>
+					<ChatWidget user={currentUser} />
+				</>
+			}
 		</>
 	);
 }

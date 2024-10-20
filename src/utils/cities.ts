@@ -15501,6 +15501,5 @@ export const getCities = (cities) => {
 			}
 		}
 	}
-	console.log('citiesData', citiesData)
 	return citiesData;
 }

@@ -83,7 +83,7 @@ const Header = ({ user }: Props) => {
 	const handleLogout = async () => {
 		try {
 			await logout().unwrap();
-			navigate("/login");
+			navigate("/login", { replace: true });
 		} catch (error) {
 			const maybeError = isErrorWithMessage(error);
 

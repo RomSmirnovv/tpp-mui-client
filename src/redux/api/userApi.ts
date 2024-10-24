@@ -37,6 +37,16 @@ export const userApi = createApi({
 			},
 			providesTags: ['User'],
 		}),
+		getUserByProfile: builder.query<IUser, string>({
+			query(id) {
+				return {
+					url: `user/${id}`,
+					method: 'GET',
+					credentials: 'include',
+				};
+			},
+			providesTags: ['User'],
+		}),
 		editUser: builder.mutation<IUser, IUser>({
 			query: (body) => ({
 				url: 'user',
@@ -70,5 +80,6 @@ export const {
 	useGetAllUsersQuery,
 	useEditUserMutation,
 	useCreateUserMutation,
-	useDeleteUserMutation
+	useDeleteUserMutation,
+	useGetUserByProfileQuery
 } = userApi;

@@ -19,7 +19,7 @@ import { useLogoutUserMutation } from '../../redux/api/authApi';
 import { isErrorWithMessage } from '../../utils/is-error-with-message';
 import { useGetNotificationsByUserQuery } from '../../redux/api/notificationApi';
 import NotificationItem from '../notification-item';
-import { INotification } from '../../redux/api/types';
+import { INotification, IUser } from '../../redux/api/types';
 import moment from 'moment';
 import dayjs from 'dayjs';
 import { useMemo } from 'react';
@@ -27,6 +27,8 @@ import { io } from 'socket.io-client';
 import { Howl, Howler } from "howler";
 import notificationVoice from '../../assets/voices/notification.mp3'
 import { BASE_URL } from '../../config';
+import GroupIcon from '@mui/icons-material/Group';
+import { useGetAllUsersQuery, useGetUserQuery } from '../../redux/api/userApi';
 
 
 const getPages = (userRole: number) => {
@@ -48,11 +50,14 @@ type Props = {
 const socket = io(BASE_URL);
 
 const Header = ({ user }: Props) => {
+	const {data: currentUser} = useGetUserQuery(null);
 	const navigate = useNavigate();
 	const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
 	const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+	const [anchorElUserAdmin, setAnchorElUserAdmin] = React.useState<null | HTMLElement>(null);
 	const [anchorElNotification, setAnchorElNotification] = React.useState<null | HTMLElement>(null);
 	const [logout, { isLoading: logoutIsLoading, error: logoutError }] = useLogoutUserMutation();
+	const { data: users, isSuccess: isUsersSuccess, isLoading: isUsersLoading } = useGetAllUsersQuery(null);
 
 	const [notificationData, setNotificationData] = React.useState([])
 	const [counterNoReaded, setCounterNoReaded] = React.useState(notificationData?.filter((item) => !item.readed).length);
@@ -63,6 +68,9 @@ const Header = ({ user }: Props) => {
 	};
 	const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
 		setAnchorElUser(event.currentTarget);
+	};
+	const handleOpenUserMenuAdmin = (event: React.MouseEvent<HTMLElement>) => {
+		setAnchorElUserAdmin(event.currentTarget);
 	};
 	const handleOpenNotificationMenu = (event: React.MouseEvent<HTMLElement>) => {
 		setAnchorElNotification(event.currentTarget);
@@ -76,14 +84,18 @@ const Header = ({ user }: Props) => {
 		setAnchorElUser(null);
 	};
 
+	const handleCloseUserMenuAdmin = () => {
+		setAnchorElUserAdmin(null);
+	};
+
 	const handleCloseNotificationMenu = () => {
 		setAnchorElNotification(null);
 	};
 
 	const handleLogout = async () => {
 		try {
-			await logout().unwrap();
-			navigate("/login", { replace: true });
+			await logout();
+			
 		} catch (error) {
 			const maybeError = isErrorWithMessage(error);
 
@@ -92,6 +104,17 @@ const Header = ({ user }: Props) => {
 			} else {
 				setError("Неизвестная ошибка");
 			}
+		}
+		navigate("/login", { replace: true });	
+	}
+
+	const handleSelectUser = (user: IUser) => {
+		if(currentUser._id === user._id) {
+			navigate(`/`, { replace: true });
+			navigate(0)
+		} else {
+			navigate(`/admin?userId=${user._id}`, { replace: true });
+			navigate(0)
 		}
 	}
 
@@ -195,25 +218,7 @@ const Header = ({ user }: Props) => {
 								: null}
 						</Menu>
 					</Box>
-					<AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-					<Typography
-						variant="h5"
-						noWrap
-						component="a"
-						href="#app-bar-with-responsive-menu"
-						sx={{
-							mr: 2,
-							display: { xs: 'flex', md: 'none' },
-							flexGrow: 1,
-							fontFamily: 'monospace',
-							fontWeight: 700,
-							letterSpacing: '.3rem',
-							color: 'inherit',
-							textDecoration: 'none',
-						}}
-					>
-						LOGO
-					</Typography>
+					
 					<Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
 						<NavLink to="/" style={{ margin: '10px', color: 'white', display: 'block', fontWeight: '400' }}>База данных</NavLink>
 						{user.role == 2 ?
@@ -253,6 +258,37 @@ const Header = ({ user }: Props) => {
 							{notificationData && notificationData.length === 0 && <MenuItem><Typography textAlign="center">Нет уведомлений</Typography></MenuItem>}
 						</Menu>
 					</Box>
+					{currentUser.role == 2 ? 
+					<Box sx={{ flexGrow: 0 }}>
+						<Tooltip title="Выбрать пользователя">
+							<IconButton onClick={handleOpenUserMenuAdmin} sx={{ p: 0 }}>
+								<GroupIcon sx={{ width: '2rem', height: '2rem', color: 'white', mr: 2 }} />
+							</IconButton>
+						</Tooltip>
+						<Menu
+							sx={{ mt: '45px' }}
+							id="menu-appbar"
+							anchorEl={anchorElUserAdmin}
+							anchorOrigin={{
+								vertical: 'top',
+								horizontal: 'right',
+							}}
+							keepMounted
+							transformOrigin={{
+								vertical: 'top',
+								horizontal: 'right',
+							}}
+							open={Boolean(anchorElUserAdmin)}
+							onClose={handleCloseUserMenuAdmin}
+						>
+							{users && users.map((user: IUser) => (								
+								<MenuItem key={user._id} onClick={() => handleSelectUser(user)}>
+									<Typography textAlign="center">{user.surname} {user.name}</Typography>
+								</MenuItem>
+							))}
+						</Menu>
+					</Box>
+					: null}
 
 					<Box sx={{ flexGrow: 0 }}>
 						<Tooltip title="Профиль">
@@ -276,7 +312,7 @@ const Header = ({ user }: Props) => {
 							open={Boolean(anchorElUser)}
 							onClose={handleCloseUserMenu}
 						>
-							<MenuItem key={settings[0]} onClick={handleLogout}>
+							<MenuItem key={settings[0]}>
 								<NavLink to="/profile" ><Typography textAlign="center">{settings[0]}</Typography></NavLink>
 							</MenuItem>
 							<MenuItem key={settings[1]} onClick={handleLogout}>

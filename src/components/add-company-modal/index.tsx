@@ -73,7 +73,6 @@ const AddCompanyModal = ({ user, list, open = false, handleClose = () => { } }) 
 					<Box component="form" onSubmit={handleAddCompany} sx={{ mt: 1 }} >
 						<TextField
 							margin="normal"
-							required
 							fullWidth
 							id='name'
 							label='Название'

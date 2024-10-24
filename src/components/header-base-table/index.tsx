@@ -96,7 +96,7 @@ const HeaderBaseTable = ({ user }: Props) => {
 			setDataLists(lists)
 			setActiveList(lists.find(list => list.checked === true))
 		}
-	}, [lists, activeList]);
+	}, [user, lists, activeList]);
 
 	return (
 		<>

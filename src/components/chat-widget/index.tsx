@@ -13,6 +13,7 @@ import Messages from './messages';
 import Rooms from './rooms/index.tsx';
 import SendMessage from './sendMessage/index.tsx';
 import { BASE_URL } from '../../config.ts';
+import { useGetUserQuery } from '../../redux/api/userApi.ts';
 
 const socketChat = io(BASE_URL);
 
@@ -20,7 +21,8 @@ type Props = {
 	user: IUser
 }
 
-const ChatWidget = ({ user }: Props) => {
+const ChatWidget = () => {
+	const {data: user} = useGetUserQuery(null)
 	const [activeRoom, setActiveRoom] = React.useState('all-chat');
 	const [unreadMessages, setUnreadMessages] = React.useState(false);
 

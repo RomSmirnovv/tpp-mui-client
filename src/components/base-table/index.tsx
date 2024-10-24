@@ -17,10 +17,12 @@ import { CITIES, getCities } from '../../utils/cities';
 
 const formatInitialColumns = (columns: GridColDef[]) => {
 	let formatColumns = {}
-	for (let i = 0; i < columns.length; i++) {
-		Object.defineProperty(formatColumns, columns[i].field, {
-			value: columns[i].checked
-		})
+	if(columns && columns.length > 0) {
+		for (let i = 0; i < columns.length; i++) {
+			Object.defineProperty(formatColumns, columns[i].field, {
+				value: columns[i].checked
+			})
+		}
 	}
 	return formatColumns;
 }

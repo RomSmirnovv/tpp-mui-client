@@ -1,22 +1,22 @@
 import { useCookies } from 'react-cookie';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useGetUserQuery } from '../../redux/api/userApi';
+import Cookies from 'universal-cookie';
 import FullScreenLoader from '../fullscreen-loader';
 
 const PrivateRouter = () => {
-	const [cookies] = useCookies(['logged_in']);
-	const { data: currentUser, isLoading, isSuccess } = useGetUserQuery(null, { skip: !cookies.logged_in });
+	const cookies = new Cookies();
+	const logged_in = cookies.get('logged_in');
+	const { data: currentUser, isLoading, isSuccess } = useGetUserQuery(null, { skip: !logged_in });
 
-	if (!cookies.logged_in) {
-		return <Navigate to='/login' />;
-	}
+
 	if (isLoading) {
 		return <FullScreenLoader />
 	}
-	if (!currentUser) {
+	if (!logged_in || !currentUser) {
 		return <Navigate to='/login' />
 	}
-	if (currentUser && cookies.logged_in) {
+	if (logged_in && currentUser) {
 		return <Outlet />
 	}
 }

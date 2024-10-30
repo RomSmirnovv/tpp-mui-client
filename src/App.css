@@ -89,6 +89,12 @@
 .row__color__84d166 {
   background-color: #84d166a1 !important;
 }
-button:focus, button:focus-visible {
+
+button:focus,
+button:focus-visible {
   outline: none !important;
+}
+
+.MuiDataGrid-columnsManagementRow:first-child {
+  display: none;
 }

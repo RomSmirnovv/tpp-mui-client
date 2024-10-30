@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { useEditListMutation, useGetListByUserQuery } from '../../redux/api/listApi';
 import { IList, IUser } from '../../redux/api/types';
 import { useAppSelector } from '../../redux/store';
@@ -13,11 +13,12 @@ import moment from 'moment'
 import EditTextarea from '../edit-textarea';
 import { getGridNumericOperators } from '@mui/x-data-grid';
 import { CITIES, getCities } from '../../utils/cities';
+import { DispatchProp } from 'react-redux';
 
 
 const formatInitialColumns = (columns: GridColDef[]) => {
 	let formatColumns = {}
-	if(columns && columns.length > 0) {
+	if (columns && columns.length > 0) {
 		for (let i = 0; i < columns.length; i++) {
 			Object.defineProperty(formatColumns, columns[i].field, {
 				value: columns[i].checked
@@ -26,8 +27,6 @@ const formatInitialColumns = (columns: GridColDef[]) => {
 	}
 	return formatColumns;
 }
-
-
 
 const optionsCities = getCities(CITIES)
 
@@ -41,12 +40,12 @@ const renderCell = {
 	renderCell: (params: GridRenderCellParams) => <CompanyRowSettings options={optionsCities} params={params} />,
 }
 
-
 type Props = {
 	user: IUser
+	setSelectedRows: Dispatch<SetStateAction<Array<string>>>;
 }
 
-const BaseTable = ({ user }: Props) => {
+const BaseTable = ({ user, setSelectedRows }: Props) => {
 	const currentUser = useAppSelector((state) => state.userState.user) || {};
 	const [state, setState] = useState(false)
 	const [columns, setColumns] = useState([])
@@ -62,7 +61,6 @@ const BaseTable = ({ user }: Props) => {
 	const localizedTextsMap = {
 		columnsMenuButtonLabel: 'Меню',
 	};
-
 	const onColumnVisibilityModelChanged = async (model: GridColumnVisibilityModel) => {
 		const fieldName = Object.keys(model)[0]
 		const fieldValue = Object.values(model)[0]
@@ -82,8 +80,7 @@ const BaseTable = ({ user }: Props) => {
 			await editList(updateList).unwrap();
 		} catch (error) {
 		}
-	}
-
+	};
 	const onColumnWidthChanged = async (params: GridColumnResizeParams) => {
 		const fieldName = params.colDef.field
 		const fieldValue = params.width
@@ -103,8 +100,7 @@ const BaseTable = ({ user }: Props) => {
 			await editList(updateList).unwrap();
 		} catch (error) {
 		}
-	}
-
+	};
 	const processRowUpdate = async (newRow: any, oldRow: any) => {
 		console.log(oldRow)
 		console.log(newRow)
@@ -117,6 +113,9 @@ const BaseTable = ({ user }: Props) => {
 		} catch (error) {
 			return oldRow;
 		}
+	};
+	const getSelectedRows = (params) => {
+		setSelectedRows(() => params);
 	}
 
 	useEffect(() => {
@@ -184,6 +183,7 @@ const BaseTable = ({ user }: Props) => {
 					},
 				}}
 				disableDensitySelector
+				checkboxSelection={user.role === 2}
 				loading={isEditing}
 				columnVisibilityModel={initialColumns}
 				onColumnVisibilityModelChange={onColumnVisibilityModelChanged}
@@ -193,6 +193,7 @@ const BaseTable = ({ user }: Props) => {
 				getRowId={(row) => row._id}
 				sx={{ mt: 1, mb: 2, height: '75vh', border: '1px solid #e0e0e0' }}
 				getRowClassName={(params) => `row__color__${params.row.color && params.row.color.replace('#', '')}`}
+				onRowSelectionModelChange={getSelectedRows}
 			/>
 		</>
 	);

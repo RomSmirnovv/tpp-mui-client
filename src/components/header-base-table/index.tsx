@@ -13,12 +13,14 @@ import ConfirmDialogDeleteList from '../confirm-dialog-delete-list';
 import EditingListName from '../editing-list-name';
 import AddColumnModal from '../add-column-modal';
 import AddCompanyModal from '../add-company-modal';
+import { useGetCompaniesQuery } from '../../redux/api/companyApi';
 
 type Props = {
 	user: IUser
+	selectedRows: string[]
 }
 
-const HeaderBaseTable = ({ user }: Props) => {
+const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 	const [open, setOpen] = useState(false);
 	const [alertOpen, setAlertOpen] = useState(false);
 	const [alertMessage, setAlertMessage] = useState('');
@@ -30,10 +32,12 @@ const HeaderBaseTable = ({ user }: Props) => {
 	const [selectedEditList, setSelectedEditList] = useState<any>(null);
 	const [selectedList, setSelectedList] = useState<any>(null);
 	const { data: lists, isSuccess: isListsSuccess, isLoading: isListsLoading } = useGetListByUserQuery(user._id as UserId, { skip: !user._id });
+	const { data: companies, isSuccess: isCompaniesSuccess } = useGetCompaniesQuery(user._id);
 	const [editList, { isSuccess: isEdited, isLoading: isEditing }] = useEditListMutation();
 	const [addList, { isSuccess: isCreated, isLoading: isCreating }] = useAddListMutation();
 	const [openModal, setOpenModal] = useState(false);
 	const [openAddCompanyModal, setOpenAddCompanyModal] = useState(false);
+	const [copyRowsButtonVisible, setCopyRowsButtonVisible] = useState(false);
 
 	const handleOpenModal = () => setOpenModal(true);
 	const handleCloseModal = () => setOpenModal(false);
@@ -90,6 +94,29 @@ const HeaderBaseTable = ({ user }: Props) => {
 		setEditing(true);
 	}
 
+	const handleCopyRows = () => {
+		console.log('selectedRows', selectedRows)
+	}
+	const handleCopyList = () => {
+		console.log('selectedRows', selectedRows)
+		if (dataLists) {
+			let activeList = dataLists.find(list => list.checked === true)
+			console.log('activeList', activeList)
+		}
+		if (companies && activeList) {
+			let rowsByActiveList = companies.filter(company => company.listName === activeList?.name)
+			console.log('rowsByActiveList', rowsByActiveList)
+		}
+	}
+
+	useEffect(() => {
+		if (selectedRows.length > 0) {
+			setCopyRowsButtonVisible(() => true)
+		} else {
+			setCopyRowsButtonVisible(() => false)
+		}
+	}, [selectedRows])
+
 
 	useEffect(() => {
 		if (lists) {
@@ -129,6 +156,9 @@ const HeaderBaseTable = ({ user }: Props) => {
 				<AddCircleOutlineOutlinedIcon sx={{ cursor: 'pointer', fontSize: 42, pl: 2, color: 'primary.main', mt: '8px' }} onClick={handleAddList} />
 				<Button sx={{ ml: 2 }} variant="contained" onClick={handleOpenAddCompanyModal} >Добавить запись</Button>
 				<Button sx={{ ml: 2 }} variant="outlined" onClick={handleOpenModal} >Добавить новую колонку</Button>
+				{copyRowsButtonVisible && <Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyRows} >Копировать/Перенести записи</Button>}
+
+				<Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyList} >Копировать/Перенести лист</Button>
 				<ConfirmDialogDeleteList selectedList={selectedList} open={open} handleClose={handleClose} setAlertOpen={setAlertOpen} setAlertMessage={setAlertMessage} setAlertVariant={setAlertVariant} />
 			</Box>
 

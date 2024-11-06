@@ -14,6 +14,7 @@ import EditingListName from '../editing-list-name';
 import AddColumnModal from '../add-column-modal';
 import AddCompanyModal from '../add-company-modal';
 import { useGetCompaniesQuery } from '../../redux/api/companyApi';
+import CopyRowsModal from '../copy-rows-modal';
 
 type Props = {
 	user: IUser
@@ -38,6 +39,9 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 	const [openModal, setOpenModal] = useState(false);
 	const [openAddCompanyModal, setOpenAddCompanyModal] = useState(false);
 	const [copyRowsButtonVisible, setCopyRowsButtonVisible] = useState(false);
+	const [openCopyRowsModal, setOpenCopyRowsModal] = useState(false);
+
+	const [copyRowsData, setCopyRowsData] = useState([]);
 
 	const handleOpenModal = () => setOpenModal(true);
 	const handleCloseModal = () => setOpenModal(false);
@@ -95,7 +99,7 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 	}
 
 	const handleCopyRows = () => {
-		console.log('selectedRows', selectedRows)
+		setOpenCopyRowsModal(true)
 	}
 	const handleCopyList = () => {
 		console.log('selectedRows', selectedRows)
@@ -158,7 +162,7 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 				<Button sx={{ ml: 2 }} variant="outlined" onClick={handleOpenModal} >Добавить новую колонку</Button>
 				{copyRowsButtonVisible && <Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyRows} >Копировать/Перенести записи</Button>}
 
-				<Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyList} >Копировать/Перенести лист</Button>
+				{/* <Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyList} >Копировать/Перенести лист</Button> */}
 				<ConfirmDialogDeleteList selectedList={selectedList} open={open} handleClose={handleClose} setAlertOpen={setAlertOpen} setAlertMessage={setAlertMessage} setAlertVariant={setAlertVariant} />
 			</Box>
 
@@ -167,6 +171,7 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 			</Collapse>
 			<AddColumnModal open={openModal} handleClose={handleCloseModal} />
 			<AddCompanyModal user={user} list={activeList} open={openAddCompanyModal} handleClose={handleCloseAddCompanyModal} />
+			<CopyRowsModal selectedRows={selectedRows} user={user} open={openCopyRowsModal} handleClose={() => setOpenCopyRowsModal(false)} />
 		</>
 	);
 }

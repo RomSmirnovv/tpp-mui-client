@@ -9,6 +9,15 @@ export const companyApi = createApi({
 	}),
 	tagTypes: ['Company'],
 	endpoints: (builder) => ({
+		getAllCompanies: builder.query<ICompany[], void>({
+			query() {
+				return {
+					url: 'company',
+					method: 'GET',
+				};
+			},
+			providesTags: ['Company'],
+		}),
 		getCompanies: builder.query<ICompany, UserId>({
 			query(userId) {
 				return {
@@ -58,5 +67,6 @@ export const {
 	useEditCompanyMutation,
 	useAddCompanyMutation,
 	useDeleteCompanyMutation,
-	useGetOneCompanyQuery
+	useGetOneCompanyQuery,
+	useGetAllCompaniesQuery
 } = companyApi;

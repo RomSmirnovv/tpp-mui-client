@@ -9,6 +9,15 @@ export const listApi = createApi({
 	}),
 	tagTypes: ['List'],
 	endpoints: (builder) => ({
+		getAllList: builder.query<IList[], void>({
+			query() {
+				return {
+					url: 'list',
+					method: 'GET',
+				};
+			},
+			providesTags: ['List'],
+		}),
 		getListByUser: builder.query<IList[], UserId>({
 			query(userId) {
 				return {
@@ -58,5 +67,6 @@ export const {
 	useEditListMutation,
 	useAddListMutation,
 	useDeleteListMutation,
-	useGetOneListQuery
+	useGetOneListQuery,
+	useGetAllListQuery
 } = listApi;

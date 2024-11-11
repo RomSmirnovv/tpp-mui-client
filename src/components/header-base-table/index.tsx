@@ -15,6 +15,7 @@ import AddColumnModal from '../add-column-modal';
 import AddCompanyModal from '../add-company-modal';
 import { useGetCompaniesQuery } from '../../redux/api/companyApi';
 import CopyRowsModal from '../copy-rows-modal';
+import CopyListModal from '../copy-list-modal';
 
 type Props = {
 	user: IUser
@@ -40,6 +41,7 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 	const [openAddCompanyModal, setOpenAddCompanyModal] = useState(false);
 	const [copyRowsButtonVisible, setCopyRowsButtonVisible] = useState(false);
 	const [openCopyRowsModal, setOpenCopyRowsModal] = useState(false);
+	const [openCopyListModal, setOpenCopyListModal] = useState(false);
 
 	const [copyRowsData, setCopyRowsData] = useState([]);
 
@@ -102,15 +104,16 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 		setOpenCopyRowsModal(true)
 	}
 	const handleCopyList = () => {
-		console.log('selectedRows', selectedRows)
-		if (dataLists) {
-			let activeList = dataLists.find(list => list.checked === true)
-			console.log('activeList', activeList)
-		}
-		if (companies && activeList) {
-			let rowsByActiveList = companies.filter(company => company.listName === activeList?.name)
-			console.log('rowsByActiveList', rowsByActiveList)
-		}
+		setOpenCopyListModal(true)
+		// console.log('selectedRows', selectedRows)
+		// if (dataLists) {
+		// 	let activeList = dataLists.find(list => list.checked === true)
+		// 	console.log('activeList', activeList)
+		// }
+		// if (companies && activeList) {
+		// 	let rowsByActiveList = companies.filter(company => company.listName === activeList?.name)
+		// 	console.log('rowsByActiveList', rowsByActiveList)
+		// }
 	}
 
 	useEffect(() => {
@@ -162,7 +165,7 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 				<Button sx={{ ml: 2 }} variant="outlined" onClick={handleOpenModal} >Добавить новую колонку</Button>
 				{copyRowsButtonVisible && <Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyRows} >Копировать/Перенести записи</Button>}
 
-				{/* <Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyList} >Копировать/Перенести лист</Button> */}
+				{<Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyList} >Копировать/Перенести лист</Button>}
 				<ConfirmDialogDeleteList selectedList={selectedList} open={open} handleClose={handleClose} setAlertOpen={setAlertOpen} setAlertMessage={setAlertMessage} setAlertVariant={setAlertVariant} />
 			</Box>
 
@@ -172,6 +175,7 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 			<AddColumnModal open={openModal} handleClose={handleCloseModal} />
 			<AddCompanyModal user={user} list={activeList} open={openAddCompanyModal} handleClose={handleCloseAddCompanyModal} />
 			<CopyRowsModal selectedRows={selectedRows} user={user} open={openCopyRowsModal} handleClose={() => setOpenCopyRowsModal(false)} />
+			<CopyListModal selectedListName={activeList?.name} user={user} open={openCopyListModal} handleClose={() => setOpenCopyListModal(false)} />
 		</>
 	);
 }

@@ -47,42 +47,47 @@ const CopyRowsModal = ({ selectedRows, user, open = false, handleClose = () => {
             })
             setOpenAlert(true);
         }
-        let copyData = {
-            userId: data.get('user'),
-            fullName: users?.find(u => u._id === data.get('user'))?.surname + ' ' + users?.find(u => u._id === data.get('user'))?.name + ' ' + users?.find(u => u._id === data.get('user'))?.patronymic,
-            listName: lists?.find(l => l._id === data.get('list'))?.name,
-            delListName: lists?.find(l => l._id === data.get('list'))?.name
-        }
-        if (data.get('newlist') != '') {
-            const newList = {
-                name: data.get('newlist'),
-                checked: false,
-                userId: data.get('user'),
-            }
-            await addList(newList as any).unwrap();
-            copyData.listName = data.get('newlist');
-            copyData.delListName = data.get('newlist');
-        }
-        if (copyAndRecover === 'copy') {
-            if (selectedRows && selectedRows.length > 0) {
-                for (let i = 0; i < selectedRows.length; i++) {
-                    let oldCompany = companies?.find(c => c._id === selectedRows[i]);
-                    let newCompany = { ...oldCompany, listName: copyData.listName, delListName: copyData.delListName, userId: copyData.userId, fullName: copyData.fullName };
-                    delete newCompany._id;
-                    await createCompany(newCompany).unwrap();
+        if (data.get('user')) {
+            if (data.get('list') || data.get('newlist')) {
+
+                let copyData = {
+                    userId: data.get('user'),
+                    fullName: users?.find(u => u._id === data.get('user'))?.surname + ' ' + users?.find(u => u._id === data.get('user'))?.name + ' ' + users?.find(u => u._id === data.get('user'))?.patronymic,
+                    listName: lists?.find(l => l._id === data.get('list'))?.name,
+                    delListName: lists?.find(l => l._id === data.get('list'))?.name
+                }
+                if (data.get('newlist') != '') {
+                    const newList = {
+                        name: data.get('newlist'),
+                        checked: false,
+                        userId: data.get('user'),
+                    }
+                    await addList(newList as any).unwrap();
+                    copyData.listName = data.get('newlist');
+                    copyData.delListName = data.get('newlist');
+                }
+                if (copyAndRecover === 'copy') {
+                    if (selectedRows && selectedRows.length > 0) {
+                        for (let i = 0; i < selectedRows.length; i++) {
+                            let oldCompany = companies?.find(c => c._id === selectedRows[i]);
+                            let newCompany = { ...oldCompany, listName: copyData.listName, delListName: copyData.delListName, userId: copyData.userId, fullName: copyData.fullName };
+                            delete newCompany._id;
+                            await createCompany(newCompany).unwrap();
+                        }
+                    }
+                    handleClose();
+                }
+                if (copyAndRecover === 'recover') {
+                    if (selectedRows && selectedRows.length > 0) {
+                        for (let i = 0; i < selectedRows.length; i++) {
+                            let oldCompany = companies?.find(c => c._id === selectedRows[i]);
+                            let newCompany = { ...oldCompany, listName: copyData.listName, delListName: copyData.delListName, userId: copyData.userId, fullName: copyData.fullName };
+                            await editCompany(newCompany).unwrap();
+                        }
+                    }
+                    handleClose();
                 }
             }
-            handleClose();
-        }
-        if (copyAndRecover === 'recover') {
-            if (selectedRows && selectedRows.length > 0) {
-                for (let i = 0; i < selectedRows.length; i++) {
-                    let oldCompany = companies?.find(c => c._id === selectedRows[i]);
-                    let newCompany = { ...oldCompany, listName: copyData.listName, delListName: copyData.delListName, userId: copyData.userId, fullName: copyData.fullName };
-                    await editCompany(newCompany).unwrap();
-                }
-            }
-            handleClose();
         }
     }
 

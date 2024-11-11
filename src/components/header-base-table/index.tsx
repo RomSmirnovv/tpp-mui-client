@@ -163,9 +163,12 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 				<AddCircleOutlineOutlinedIcon sx={{ cursor: 'pointer', fontSize: 42, pl: 2, color: 'primary.main', mt: '8px' }} onClick={handleAddList} />
 				<Button sx={{ ml: 2 }} variant="contained" onClick={handleOpenAddCompanyModal} >Добавить запись</Button>
 				<Button sx={{ ml: 2 }} variant="outlined" onClick={handleOpenModal} >Добавить новую колонку</Button>
-				{copyRowsButtonVisible && <Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyRows} >Копировать/Перенести записи</Button>}
-
-				{<Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyList} >Копировать/Перенести лист</Button>}
+				{user.role === 2 ?
+					<>
+						{copyRowsButtonVisible && <Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyRows} >Копировать/Перенести записи</Button>}
+						{<Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyList} >Копировать/Перенести лист</Button>}
+					</>
+					: null}
 				<ConfirmDialogDeleteList selectedList={selectedList} open={open} handleClose={handleClose} setAlertOpen={setAlertOpen} setAlertMessage={setAlertMessage} setAlertVariant={setAlertVariant} />
 			</Box>
 

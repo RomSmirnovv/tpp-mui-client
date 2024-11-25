@@ -117,10 +117,12 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 	}
 
 	useEffect(() => {
-		if (selectedRows.length > 0) {
-			setCopyRowsButtonVisible(() => true)
-		} else {
-			setCopyRowsButtonVisible(() => false)
+		if (selectedRows) {
+			if (selectedRows.length > 0) {
+				setCopyRowsButtonVisible(() => true)
+			} else {
+				setCopyRowsButtonVisible(() => false)
+			}
 		}
 	}, [selectedRows])
 

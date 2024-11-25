@@ -91,6 +91,7 @@ const CompanyRowSettings = ({ params, options }: Props) => {
 						<ContentCopyOutlinedIcon onClick={handleOpenEditList} sx={{ m: 0.1, fontSize: 18, cursor: 'pointer' }} titleAccess="Копировать/Перенести в другой лист" />
 					</Box>
 					<div style={{ lineHeight: '14px', marginBottom: '3px', fontSize: '12px', fontStyle: 'italic' }}>{moment(params.row.updateDate).format('DD.MM.YYYY HH:mm:ss')}</div>
+					<div style={{ lineHeight: '14px', marginBottom: '3px', fontSize: '12px', fontStyle: 'italic', color: 'red' }}>{params.row.editIsAdmin ? 'Изменил админ.' : ''}</div>
 				</>
 			}
 			<EditCompanyModal options={options} company={params.row} open={openEdit} handleClose={handleCloseEdit} />

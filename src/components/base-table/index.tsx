@@ -102,8 +102,11 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 		}
 	};
 	const processRowUpdate = async (newRow: any, oldRow: any) => {
-		console.log(oldRow)
-		console.log(newRow)
+		if (user._id === currentUser._id) {
+			newRow.editIsAdmin = false
+		} else {
+			newRow.editIsAdmin = true
+		}
 		if (oldRow.requirement != newRow.requirement || oldRow.offer != newRow.offer || oldRow.note != newRow.note) {
 			newRow.updateDate = moment().format('YYYY-MM-DD HH:MM:ss')
 		}
@@ -147,7 +150,7 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 						filterOperators: getGridNumericOperators().filter(
 							(operator) => operator.value === '=',
 						),
-						renderCell: (params: GridRenderCellParams) => <CompanyRowColors params={params} />,
+						renderCell: (params: GridRenderCellParams) => <CompanyRowColors params={params} user={user} currentUser={currentUser} />,
 					}
 				}
 				return {
@@ -192,7 +195,7 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 				processRowUpdate={processRowUpdate}
 				getRowId={(row) => row._id}
 				sx={{ mt: 1, mb: 2, height: '75vh', border: '1px solid #e0e0e0' }}
-				getRowClassName={(params) => `row__color__${params.row.color && params.row.color.replace('#', '')}`}
+				getRowClassName={(params) => `row__color__${params.row.color && params.row.color.replace('#', '')} ${params.row.editIsAdmin ? 'row__height__large' : ''}`}
 				onRowSelectionModelChange={getSelectedRows}
 			/>
 		</>

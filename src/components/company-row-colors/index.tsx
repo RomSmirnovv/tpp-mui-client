@@ -2,13 +2,20 @@ import { useEditCompanyMutation } from '../../redux/api/companyApi';
 import { ICompany } from '../../redux/api/types';
 import styles from './index.module.css';
 type Props = {
+	user: any
+	currentUser: any
 	params: any
 }
-const CompanyRowColors = ({ params }: Props) => {
+const CompanyRowColors = ({ params, user, currentUser }: Props) => {
 	const [editCompany, { isLoading: isEditCompanyLoading }] = useEditCompanyMutation()
 
 	const editColor = async (company: ICompany, color: string) => {
-		const updateCompany = { ...company, color }
+		let updateCompany = { ...company, color }
+		if (user._id === currentUser._id) {
+			updateCompany.editIsAdmin = false
+		} else {
+			updateCompany.editIsAdmin = true
+		}
 		if (company.color === color) {
 			updateCompany.color = ''
 		}

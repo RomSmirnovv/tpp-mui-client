@@ -78,6 +78,18 @@
   height: 66px !important;
 }
 
+.row__height__large {
+  min-height: 81px !important;
+  max-height: 81px !important;
+  height: 81px !important;
+}
+
+.row__height__large .MuiDataGrid-cell {
+  min-height: 81px !important;
+  max-height: 81px !important;
+  height: 81px !important;
+}
+
 .row__color__ef7575 {
   background-color: #ef757596 !important;
 }

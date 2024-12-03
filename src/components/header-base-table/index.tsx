@@ -23,6 +23,7 @@ type Props = {
 }
 
 const HeaderBaseTable = ({ user, selectedRows }: Props) => {
+	const currentUser = useAppSelector((state) => state.userState.user) || {};
 	const [open, setOpen] = useState(false);
 	const [alertOpen, setAlertOpen] = useState(false);
 	const [alertMessage, setAlertMessage] = useState('');
@@ -165,7 +166,7 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 				<AddCircleOutlineOutlinedIcon sx={{ cursor: 'pointer', fontSize: 42, pl: 2, color: 'primary.main', mt: '8px' }} onClick={handleAddList} />
 				<Button sx={{ ml: 2 }} variant="contained" onClick={handleOpenAddCompanyModal} >Добавить запись</Button>
 				<Button sx={{ ml: 2 }} variant="outlined" onClick={handleOpenModal} >Добавить новую колонку</Button>
-				{user.role === 2 ?
+				{currentUser.role === 2 ?
 					<>
 						{copyRowsButtonVisible && <Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyRows} >Копировать/Перенести записи</Button>}
 						{<Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyList} >Копировать/Перенести лист</Button>}

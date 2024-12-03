@@ -209,7 +209,7 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 					},
 				}}
 				disableDensitySelector
-				checkboxSelection={user.role === 2}
+				checkboxSelection={currentUser.role === 2}
 				loading={isEditing}
 				columnVisibilityModel={initialColumns}
 				onColumnVisibilityModelChange={onColumnVisibilityModelChanged}

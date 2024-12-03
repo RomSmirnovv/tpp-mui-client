@@ -16,6 +16,8 @@ import { CITIES, getCities } from '../../utils/cities';
 import { DispatchProp } from 'react-redux';
 import StarIcon from '@mui/icons-material/Star';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 
 
 const formatInitialColumns = (columns: GridColDef[]) => {
@@ -50,8 +52,7 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 	const [editCompany, { isSuccess: isEditCompanySuccess, isLoading: isEditCompanyLoading }] = useEditCompanyMutation();
 	const [isStar, setIsStar] = useState(false);
 	const [filterCompanies, setFilterCompanies] = useState([])
-
-
+	const [filterColor, setFilterColor] = useState('')
 
 	const renderCell = {
 		key: 9999,
@@ -65,7 +66,6 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 		checked: true,
 		renderCell: (params: GridRenderCellParams) => <CompanyRowSettings options={optionsCities} params={params} />,
 	}
-
 
 	const localizedTextsMap = {
 		columnsMenuButtonLabel: 'Меню',
@@ -156,9 +156,20 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 					return {
 						...column,
 						type: 'singleSelect',
-						filterOperators: getGridNumericOperators().filter(
-							(operator) => operator.value === '=',
-						),
+						filterable: false,
+						sortable: false,
+						menuDisabled: true,
+						renderHeader: () => {
+							return (
+								<div style={{ display: 'flex', alignItems: 'center' }}>Цвет
+									<div style={{ display: 'flex', marginLeft: 2 }}>
+										{filterColor === '#ef7575' ? <RadioButtonCheckedIcon onClick={() => setFilterColor(() => '')} sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: '#ef7575' }} /> : <RadioButtonUncheckedIcon onClick={() => setFilterColor(() => '#ef7575')} sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: '#ef7575' }} />}
+										{filterColor === '#ffe51d' ? <RadioButtonCheckedIcon onClick={() => setFilterColor(() => '')} sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: '#ffe51d' }} /> : <RadioButtonUncheckedIcon onClick={() => setFilterColor(() => '#ffe51d')} sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: '#ffe51d' }} />}
+										{filterColor === '#84d166' ? <RadioButtonCheckedIcon onClick={() => setFilterColor(() => '')} sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: '#84d166' }} /> : <RadioButtonUncheckedIcon onClick={() => setFilterColor(() => '#84d166')} sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: '#84d166' }} />}
+									</div>
+								</div>
+							)
+						},
 						renderCell: (params: GridRenderCellParams) => <CompanyRowColors params={params} user={user} currentUser={currentUser} />,
 					}
 				}
@@ -175,10 +186,11 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 				return { ...company, id: company._id }
 			})
 			if (isStar) companiesData = companiesData.filter((company) => company.favorite === true);
+			if (filterColor !== '') companiesData = companiesData.filter((company) => company.color === filterColor);
 			setCompanyes(companiesData)
 			setFilterCompanies(companiesData)
 		}
-	}, [lists, companies, selectedList, isStar]);
+	}, [lists, companies, selectedList, isStar, filterColor]);
 
 	return (
 		<>

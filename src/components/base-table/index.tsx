@@ -14,6 +14,8 @@ import EditTextarea from '../edit-textarea';
 import { getGridNumericOperators } from '@mui/x-data-grid';
 import { CITIES, getCities } from '../../utils/cities';
 import { DispatchProp } from 'react-redux';
+import StarIcon from '@mui/icons-material/Star';
+import StarOutlineIcon from '@mui/icons-material/StarOutline';
 
 
 const formatInitialColumns = (columns: GridColDef[]) => {
@@ -29,16 +31,6 @@ const formatInitialColumns = (columns: GridColDef[]) => {
 }
 
 const optionsCities = getCities(CITIES)
-
-const renderCell = {
-	key: 9999,
-	field: 'actions',
-	headerName: 'Настройки',
-	width: 100,
-	hideable: false,
-	checked: true,
-	renderCell: (params: GridRenderCellParams) => <CompanyRowSettings options={optionsCities} params={params} />,
-}
 
 type Props = {
 	user: IUser
@@ -56,6 +48,23 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 	const [editList, { isSuccess: isEdited, isLoading: isEditing }] = useEditListMutation();
 	const { data: companies, isSuccess: isCompaniesSuccess } = useGetCompaniesQuery(user._id);
 	const [editCompany, { isSuccess: isEditCompanySuccess, isLoading: isEditCompanyLoading }] = useEditCompanyMutation();
+	const [isStar, setIsStar] = useState(false);
+	const [filterCompanies, setFilterCompanies] = useState([])
+
+
+
+	const renderCell = {
+		key: 9999,
+		field: 'actions',
+		renderHeader: () => <div style={{ display: 'flex', alignItems: 'center' }}>Настройки {isStar ? <StarIcon onClick={() => setIsStar(false)} sx={{ fontSize: 18, lineHeight: 0, ml: 0.5, cursor: 'pointer', color: '#ceb129' }} /> : <StarOutlineIcon onClick={() => setIsStar(true)} sx={{ fontSize: 18, lineHeight: 0, ml: 0.5, cursor: 'pointer' }} />}</div>,
+		width: 120,
+		hideable: false,
+		filterable: false,
+		sortable: false,
+		menuDisabled: true,
+		checked: true,
+		renderCell: (params: GridRenderCellParams) => <CompanyRowSettings options={optionsCities} params={params} />,
+	}
 
 
 	const localizedTextsMap = {
@@ -165,9 +174,11 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 			let companiesData = companies.filter((com) => com.listName === selectedList?.name).sort((a, b) => a.updateDate < b.updateDate ? 1 : -1).map((company) => {
 				return { ...company, id: company._id }
 			})
+			if (isStar) companiesData = companiesData.filter((company) => company.favorite === true);
 			setCompanyes(companiesData)
+			setFilterCompanies(companiesData)
 		}
-	}, [lists, companies, selectedList]);
+	}, [lists, companies, selectedList, isStar]);
 
 	return (
 		<>

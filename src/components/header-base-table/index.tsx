@@ -168,7 +168,7 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 				<Button sx={{ ml: 2 }} variant="outlined" onClick={handleOpenModal} >Добавить новую колонку</Button>
 				{currentUser.role === 2 ?
 					<>
-						{copyRowsButtonVisible && <Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyRows} >Копировать/Перенести записи</Button>}
+						{<Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyRows} >Копировать/Перенести записи</Button>}
 						{<Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyList} >Копировать/Перенести лист</Button>}
 					</>
 					: null}

@@ -8,9 +8,10 @@ import { useGetUserByProfileQuery } from '../../redux/api/userApi';
 import { useEffect, useState } from 'react';
 
 const Admin = () => {
-    const queryParameters = new URLSearchParams(window.location.search)
-    const userId = queryParameters.get("userId")
-    const {data: currentUser} = useGetUserByProfileQuery(userId || null)
+	const queryParameters = new URLSearchParams(window.location.search)
+	const [selectedRows, setSelectedRows] = useState([]);
+	const userId = queryParameters.get("userId")
+	const { data: currentUser } = useGetUserByProfileQuery(userId || null)
 	// const currentUser = useAppSelector((state) => state.userState.user) || {};
 	return (
 		<>
@@ -18,8 +19,8 @@ const Admin = () => {
 				<>
 					<Header user={currentUser} />
 					<Container sx={{ my: 3 }} maxWidth="xl">
-						<HeaderBaseTable user={currentUser} />
-						<BaseTable user={currentUser} />
+						<HeaderBaseTable user={currentUser} selectedRows={selectedRows} />
+						<BaseTable user={currentUser} setSelectedRows={setSelectedRows} />
 					</Container>
 					<ChatWidget user={currentUser} />
 				</>

@@ -51,6 +51,19 @@ export interface IColumn {
 	key?: number
 }
 
+export interface IDraftColumn {
+	_id?: string
+	headerName: string
+	field: string
+	userId: string
+}
+
+export interface IDraftRow {
+	_id?: string
+	name?: string
+	userId: string
+}
+
 export interface CompanyId {
 	_id: string
 }

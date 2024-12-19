@@ -6,6 +6,10 @@
   background-color: #ffffff;
 }
 
+body {
+  background-color: #ffffff !important;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -109,4 +113,14 @@ button:focus-visible {
 
 .MuiDataGrid-columnsManagementRow:first-child {
   display: none;
+}
+
+.import-table .MuiDataGrid-columnHeader {
+  height: 100px !important;
+}
+
+.import-autocomplete .MuiInputBase-input {
+  border: none !important;
+  padding: 0 !important;
+  margin-top: 5px !important;
 }

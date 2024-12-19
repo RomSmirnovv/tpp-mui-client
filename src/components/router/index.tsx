@@ -5,6 +5,7 @@ import Home from '../../pages/home/indesx';
 import Staff from '../../pages/staff';
 import Register from '../../pages/register';
 import Admin from '../../pages/admin';
+import Import from '../../pages/import';
 
 const Router = () => {
 	return (
@@ -14,6 +15,7 @@ const Router = () => {
 					<Route index element={<Home />} />
 					<Route path='staff' element={<Staff />} />
 					<Route path='admin' element={<Admin />} />
+					<Route path='import' element={<Import />} />
 				</Route>
 				<Route path='login' element={<Login />} />
 				<Route path='register' element={<Register />} />

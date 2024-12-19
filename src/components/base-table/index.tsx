@@ -2,11 +2,11 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'reac
 import { useEditListMutation, useGetListByUserQuery } from '../../redux/api/listApi';
 import { IList, IUser } from '../../redux/api/types';
 import { useAppSelector } from '../../redux/store';
-import { DataGrid, GridCallbackDetails, GridColDef, GridColumnOrderChangeParams, GridColumnResizeParams, GridColumnVisibilityModel, GridRenderCellParams, GridRowsProp, GridToolbar, MuiEvent } from '@mui/x-data-grid';
+import { DataGrid, GridCallbackDetails, GridColDef, GridColumnOrderChangeParams, GridColumnResizeParams, GridColumnVisibilityModel, GridRenderCellParams, GridRowsProp, GridToolbar, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton, GridToolbarQuickFilter, MuiEvent } from '@mui/x-data-grid';
 import { useDemoData } from '@mui/x-data-grid-generator';
 import { useEditCompanyMutation, useGetCompaniesQuery } from '../../redux/api/companyApi';
 import { ruRU } from '@mui/x-data-grid/locales';
-import { Button } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import CompanyRowSettings from '../company-row-settings';
 import CompanyRowColors from '../company-row-colors';
 import moment from 'moment'
@@ -18,6 +18,8 @@ import StarIcon from '@mui/icons-material/Star';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import { useGetAllColumnsQuery, useGetColumnsQuery } from '../../redux/api/columnsApi';
+import { useNavigate } from 'react-router-dom';
 
 
 const formatInitialColumns = (columns: GridColDef[]) => {
@@ -36,10 +38,14 @@ const optionsCities = getCities(CITIES)
 
 type Props = {
 	user: IUser
-	setSelectedRows: Dispatch<SetStateAction<Array<string>>>;
+	setSelectedRows: Dispatch<SetStateAction<never[]>>
+	handleOpenModal: () => void
+	handleCloseModal: () => void
+	openModal: boolean
+	updateColumns: boolean
 }
 
-const BaseTable = ({ user, setSelectedRows }: Props) => {
+const BaseTable = ({ user, setSelectedRows, handleOpenModal, handleCloseModal, openModal, updateColumns }: Props) => {
 	const currentUser = useAppSelector((state) => state.userState.user) || {};
 	const [state, setState] = useState(false)
 	const [columns, setColumns] = useState([])
@@ -49,10 +55,26 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 	const { data: lists, isSuccess: isListsSuccess, isLoading: isListsLoading } = useGetListByUserQuery(user._id);
 	const [editList, { isSuccess: isEdited, isLoading: isEditing }] = useEditListMutation();
 	const { data: companies, isSuccess: isCompaniesSuccess } = useGetCompaniesQuery(user._id);
+	const { data: allcolumns, isSuccess: isAllColumnsSuccess } = useGetAllColumnsQuery();
 	const [editCompany, { isSuccess: isEditCompanySuccess, isLoading: isEditCompanyLoading }] = useEditCompanyMutation();
 	const [isStar, setIsStar] = useState(false);
 	const [filterCompanies, setFilterCompanies] = useState([])
-	const [filterColor, setFilterColor] = useState('')
+	const [filterColor, setFilterColor] = useState('');
+	const navigate = useNavigate();
+
+
+
+	const CustomToolbar = () => {
+		return (
+			<GridToolbarContainer>
+				<GridToolbarColumnsButton />
+				<Button onClick={handleOpenModal}>Добавить новую колонку</Button>
+				<Button onClick={() => navigate('/import', { replace: true })}>Загрузить Excel</Button>
+				<Box sx={{ flexGrow: 1 }} />
+				<GridToolbarQuickFilter />
+			</GridToolbarContainer>
+		);
+	}
 
 	const renderCell = {
 		key: 9999,
@@ -131,8 +153,7 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 	}
 
 	useEffect(() => {
-
-		if (isListsSuccess) {
+		if (lists && lists.length > 0) {
 			const currentList = lists.find((list) => list.checked === true);
 			setSelectedList(currentList);
 			let currentColumns = currentList?.columns || [];
@@ -181,7 +202,7 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 			setColumns([...editCurrentColumns, renderCell]);
 			setInitialColumns(formatInitialColumns(currentList?.columns))
 		}
-		if (isCompaniesSuccess) {
+		if (companies && companies.length > 0) {
 			let companiesData = companies.filter((com) => com.listName === selectedList?.name).sort((a, b) => a.updateDate < b.updateDate ? 1 : -1).map((company) => {
 				return { ...company, id: company._id }
 			})
@@ -190,7 +211,7 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 			setCompanyes(companiesData)
 			setFilterCompanies(companiesData)
 		}
-	}, [lists, companies, selectedList, isStar, filterColor]);
+	}, [lists, companies, selectedList, isStar, filterColor, openModal, updateColumns]);
 
 	return (
 		<>
@@ -198,8 +219,7 @@ const BaseTable = ({ user, setSelectedRows }: Props) => {
 				rows={companyes}
 				columns={columns}
 				slots={{
-					toolbar: GridToolbar,
-					columnMenuIcon: () => <>1</>
+					toolbar: CustomToolbar,
 				}}
 				slotProps={{
 					toolbar: {

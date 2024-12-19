@@ -1,6 +1,7 @@
 import { Alert, Box, Button, Modal, TextField, Typography } from '@mui/material';
 import { useAddColumnMutation } from '../../redux/api/columnsApi';
 import { translit } from '../../utils/is-translit-string';
+import { useNavigate } from 'react-router-dom';
 
 const style = {
 	position: 'absolute' as 'absolute',
@@ -13,13 +14,20 @@ const style = {
 	p: 4,
 };
 
-const AddColumnModal = ({ open = false, handleClose = () => { } }) => {
+type Props = {
+	open?: boolean;
+	handleClose?: () => void;
+	setUpdateColumns?: React.Dispatch<React.SetStateAction<boolean>>;
+	updateColumns?: boolean
+}
+
+const AddColumnModal = ({ open = false, handleClose, setUpdateColumns, updateColumns }: Props) => {
 	const [createColumn, { error: createColumnError, isLoading, isSuccess }] = useAddColumnMutation();
+	const navigate = useNavigate();
 
 	const handleAddColumn = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const data = new FormData(event.currentTarget);
-		console.log(data.get('name'))
 		const newColumn = {
 			name: data.get('name') as string,
 			slug: translit(data.get('name') as string).split(' ').join('_'),
@@ -29,6 +37,7 @@ const AddColumnModal = ({ open = false, handleClose = () => { } }) => {
 		try {
 			await createColumn(newColumn as any).unwrap();
 			handleClose();
+			navigate(0);
 		} catch (error) {
 
 		}

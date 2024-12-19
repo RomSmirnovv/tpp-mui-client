@@ -20,9 +20,14 @@ import CopyListModal from '../copy-list-modal';
 type Props = {
 	user: IUser
 	selectedRows: string[]
+	openModal: boolean
+	setOpenModal: React.Dispatch<React.SetStateAction<boolean>>
+	handleCloseModal: () => void
+	setUpdateColumns: React.Dispatch<React.SetStateAction<boolean>>
+	updateColumns: boolean
 }
 
-const HeaderBaseTable = ({ user, selectedRows }: Props) => {
+const HeaderBaseTable = ({ user, selectedRows, openModal, setOpenModal, handleCloseModal, setUpdateColumns, updateColumns }: Props) => {
 	const currentUser = useAppSelector((state) => state.userState.user) || {};
 	const [open, setOpen] = useState(false);
 	const [alertOpen, setAlertOpen] = useState(false);
@@ -38,16 +43,12 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 	const { data: companies, isSuccess: isCompaniesSuccess } = useGetCompaniesQuery(user._id);
 	const [editList, { isSuccess: isEdited, isLoading: isEditing }] = useEditListMutation();
 	const [addList, { isSuccess: isCreated, isLoading: isCreating }] = useAddListMutation();
-	const [openModal, setOpenModal] = useState(false);
 	const [openAddCompanyModal, setOpenAddCompanyModal] = useState(false);
 	const [copyRowsButtonVisible, setCopyRowsButtonVisible] = useState(false);
 	const [openCopyRowsModal, setOpenCopyRowsModal] = useState(false);
 	const [openCopyListModal, setOpenCopyListModal] = useState(false);
 
 	const [copyRowsData, setCopyRowsData] = useState([]);
-
-	const handleOpenModal = () => setOpenModal(true);
-	const handleCloseModal = () => setOpenModal(false);
 
 	const handleOpenAddCompanyModal = () => setOpenAddCompanyModal(true);
 	const handleCloseAddCompanyModal = () => setOpenAddCompanyModal(false);
@@ -165,7 +166,6 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 				}
 				<AddCircleOutlineOutlinedIcon sx={{ cursor: 'pointer', fontSize: 42, pl: 2, color: 'primary.main', mt: '8px' }} onClick={handleAddList} />
 				<Button sx={{ ml: 2 }} variant="contained" onClick={handleOpenAddCompanyModal} >Добавить запись</Button>
-				<Button sx={{ ml: 2 }} variant="outlined" onClick={handleOpenModal} >Добавить новую колонку</Button>
 				{currentUser.role === 2 ?
 					<>
 						{<Button sx={{ ml: 2 }} variant="outlined" onClick={handleCopyRows} >Копировать/Перенести записи</Button>}
@@ -178,7 +178,7 @@ const HeaderBaseTable = ({ user, selectedRows }: Props) => {
 			<Collapse in={alertOpen}>
 				<Alert severity={alertVariant}>{alertMessage}</Alert>
 			</Collapse>
-			<AddColumnModal open={openModal} handleClose={handleCloseModal} />
+			<AddColumnModal open={openModal} handleClose={handleCloseModal} setUpdateColumns={setUpdateColumns} updateColumns={updateColumns} />
 			<AddCompanyModal user={user} list={activeList} open={openAddCompanyModal} handleClose={handleCloseAddCompanyModal} />
 			<CopyRowsModal selectedRows={selectedRows} user={user} open={openCopyRowsModal} handleClose={() => setOpenCopyRowsModal(false)} />
 			<CopyListModal selectedListName={activeList?.name} user={user} open={openCopyListModal} handleClose={() => setOpenCopyListModal(false)} />

@@ -72,6 +72,7 @@ const CopyRowsModal = ({ selectedRows, user, open = false, handleClose = () => {
                             let oldCompany = companies?.find(c => c._id === selectedRows[i]);
                             let newCompany = { ...oldCompany, listName: copyData.listName, delListName: copyData.delListName, userId: copyData.userId, fullName: copyData.fullName };
                             delete newCompany._id;
+                            console.log('newCompany', newCompany)
                             await createCompany(newCompany).unwrap();
                         }
                     }

@@ -55,10 +55,19 @@ export interface IDraftColumn {
 	_id?: string
 	headerName: string
 	field: string
+	saveName: string
+	saveField: string
+	checked: boolean
 	userId: string
 }
 
 export interface IDraftRow {
+	_id?: string
+	name?: string
+	userId: string
+}
+
+export interface IDraft {
 	_id?: string
 	name?: string
 	userId: string

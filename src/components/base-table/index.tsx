@@ -45,7 +45,7 @@ type Props = {
 	updateColumns: boolean
 }
 
-const BaseTable = ({ user, setSelectedRows, handleOpenModal, handleCloseModal, openModal, updateColumns }: Props) => {
+const BaseTable = ({ user, setSelectedRows, handleOpenModal, handleCloseModal, openModal, updateColumns, admin }: Props) => {
 	const currentUser = useAppSelector((state) => state.userState.user) || {};
 	const [state, setState] = useState(false)
 	const [columns, setColumns] = useState([])
@@ -69,7 +69,7 @@ const BaseTable = ({ user, setSelectedRows, handleOpenModal, handleCloseModal, o
 			<GridToolbarContainer>
 				<GridToolbarColumnsButton />
 				<Button onClick={handleOpenModal}>Добавить новую колонку</Button>
-				<Button onClick={() => navigate('/import', { replace: true })}>Загрузить Excel</Button>
+				{!admin && <Button onClick={() => navigate('/import', { replace: true })}>Загрузить Excel</Button>}
 				<Box sx={{ flexGrow: 1 }} />
 				<GridToolbarQuickFilter />
 			</GridToolbarContainer>

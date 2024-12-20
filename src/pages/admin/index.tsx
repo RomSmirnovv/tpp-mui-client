@@ -20,7 +20,7 @@ const Admin = () => {
 					<Header user={currentUser} />
 					<Container sx={{ my: 3 }} maxWidth="xl">
 						<HeaderBaseTable user={currentUser} selectedRows={selectedRows} />
-						<BaseTable user={currentUser} setSelectedRows={setSelectedRows} />
+						<BaseTable user={currentUser} setSelectedRows={setSelectedRows} admin={true} />
 					</Container>
 					<ChatWidget user={currentUser} />
 				</>

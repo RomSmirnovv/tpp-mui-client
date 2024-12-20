@@ -17,10 +17,10 @@ export const draftColumnsApi = createApi({
                 };
             }
         }),
-        getDraftColumns: builder.query<IDraftColumn, UserId>({
-            query(userId) {
+        getDraftColumns: builder.query<IDraftColumn[], string>({
+            query(draftId) {
                 return {
-                    url: `draftcolumns/${userId}`,
+                    url: `draftcolumns/${draftId}`,
                     method: 'GET',
                 };
             },

@@ -24,7 +24,7 @@ const Home = () => {
 					<Header user={currentUser} />
 					<Container sx={{ my: 3 }} maxWidth="xl">
 						<HeaderBaseTable user={currentUser} selectedRows={selectedRows} openModal={openModal} setOpenModal={setOpenModal} handleCloseModal={handleCloseModal} setUpdateColumns={setUpdateColumns} updateColumns={updateColumns} />
-						<BaseTable user={currentUser} setSelectedRows={setSelectedRows} handleOpenModal={handleOpenModal} handleCloseModal={handleCloseModal} openModal={openModal} updateColumns={updateColumns} />
+						<BaseTable user={currentUser} setSelectedRows={setSelectedRows} handleOpenModal={handleOpenModal} handleCloseModal={handleCloseModal} openModal={openModal} updateColumns={updateColumns} admin={false} />
 					</Container>
 					<ChatWidget user={currentUser} />
 				</>

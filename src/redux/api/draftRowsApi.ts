@@ -17,10 +17,10 @@ export const draftRowsApi = createApi({
                 };
             }
         }),
-        getDraftRows: builder.query<IDraftRow, UserId>({
-            query(userId) {
+        getDraftRows: builder.query<IDraftRow, string>({
+            query(draftId) {
                 return {
-                    url: `draftrow/${userId}`,
+                    url: `draftrows/${draftId}`,
                     method: 'GET',
                 };
             },

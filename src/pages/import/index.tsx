@@ -1,4 +1,4 @@
-import { Box, Checkbox, Container, TextField, Typography } from '@mui/material';
+import { Box, Checkbox, Container, Stack, TextField, Typography } from '@mui/material';
 import Header from '../../components/header';
 import HeaderBaseTable from '../../components/header-base-table';
 import BaseTable from '../../components/base-table';
@@ -12,8 +12,14 @@ import * as XLSX from 'xlsx';
 import { translit } from '../../utils/is-translit-string';
 import { DataGrid } from '@mui/x-data-grid';
 import Autocomplete from '@mui/material/Autocomplete';
-import { useGetAllColumnsQuery } from '../../redux/api/columnsApi';
+import { useGetAllColumnsQuery, useGetColumnsQuery } from '../../redux/api/columnsApi';
 import ImportTable from './import-table';
+import { useAdddraftMutation, useGetAllDraftsByUserQuery, useGetDraftQuery } from '../../redux/api/draftsApi';
+import { useAddDraftColumnMutation, useGetDraftColumnsQuery } from '../../redux/api/draftColumnsApi';
+import { useAddDraftRowMutation } from '../../redux/api/draftRowsApi';
+import { useNavigate } from 'react-router-dom';
+import Chip from '@mui/material/Chip';
+import moment from 'moment';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -29,7 +35,18 @@ const VisuallyHiddenInput = styled('input')({
 
 const Import = () => {
     const currentUser = useAppSelector((state) => state.userState.user) || {};
+    const { data: drafts, isLoading: isDraftsLoading } = useGetAllDraftsByUserQuery(currentUser._id);
+
+    const [addDraft, { isLoading: isDraftLoading }] = useAdddraftMutation();
+    const [addDraftColumn, { isLoading: isAddDraftColumnLoading }] = useAddDraftColumnMutation();
+    const [addDrafRow, { isLoading: isAddDrafRowLoading }] = useAddDraftRowMutation();
+    const [isLoading, setIsLoading] = useState(false);
+
+    const navigate = useNavigate();
+
     const { data: columns } = useGetAllColumnsQuery();
+
+
 
     const [openModal, setOpenModal] = useState(false);
 
@@ -47,110 +64,64 @@ const Import = () => {
 
     const handleChangeFile = async (e: any) => {
         const file = e.target.files[0];
-        const data = await file.arrayBuffer();
-        const workbook = XLSX.read(data);
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jdata = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        const columnsData: any[] = []
-        const rowsData: any[] = []
-        for (let i = 0; i < jdata[0].length; i++) {
-            const slug = columns && columns?.find(column => column.name === jdata[0][i]) ? columns?.find(column => column.name === jdata[0][i])?.slug : translit(jdata[0][i].toLowerCase().trimStart().trimEnd()).split(' ').join('_').split('.').join('');
-            columnsData.push({
-                field: slug,
-                headerName: jdata[0][i],
-                slug: slug,
-                checked: true,
-                type: 'Текст',
-                width: 190,
-                sortable: false,
-                disableColumnMenu: true,
-                disableReorder: false,
-                isDeleted: true,
-                renderHeader: (params) => {
-                    return (
-                        <div>
-                            <Box sx={{ display: 'flex', mb: 0.5 }}>
-                                <Checkbox sx={{ ml: -1 }} defaultChecked onChange={(event) => handleChecked(event, params)} />
-                                <Typography sx={{ mt: 1 }}>{params.colDef.name}</Typography>
-                            </Box>
-                            <Autocomplete
-                                id={params.field}
-                                sx={{ width: 150 }}
-                                className='import-autocomplete'
-                                options={columns?.map((column) => column.name)}
-                                defaultValue={params.colDef.name}
-                                onChange={(event, value) => handleAutocomplete(event, value, params)}
-                                renderInput={(params) => <TextField {...params} />}
-                            />
-                        </div>
-                    );
-                },
-            })
-        }
-        for (let i = 1; i < jdata.length; i++) {
-            if (jdata[i].length !== 0) {
-                let currentRow = {}
-                for (let k = 0; k < jdata[i].length; k++) {
-                    currentRow.id = i - 1
-                    currentRow[columnsData[k]?.slug === undefined ? '' : `${columnsData[k]?.slug}`] = jdata[i][k] === undefined ? '' : jdata[i][k];
+
+        // если есть файл сохраняем черновик
+        if (file) {
+            setIsLoading(true);
+            const newDraft = { name: file.name, userId: currentUser._id };
+            const res = await addDraft(newDraft)
+            let draftId: string = '';
+            if (res) {
+                draftId = res.data._id
+            }
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data);
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jdata = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+
+            if (draftId) {
+                // если есть ID черновика сохраняем колоки черновика
+                let columnsData = []
+                for (let i = 0; i < jdata[0].length; i++) {
+                    const slug = columns && columns?.find(column => column.name === jdata[0][i]) ? columns?.find(column => column.name === jdata[0][i])?.slug : translit(jdata[0][i].toLowerCase().trimStart().trimEnd()).split(' ').join('_').split('.').join('');
+                    const column = {
+                        headerName: jdata[0][i],
+                        saveName: jdata[0][i],
+                        slug: slug,
+                        field: slug,
+                        saveField: slug,
+                        checked: true,
+                        isDeleted: true,
+                        width: 190,
+                        type: 'Текст',
+                        userId: currentUser._id,
+                        draftId: draftId
+                    };
+                    await addDraftColumn(column)
+                    columnsData.push(column)
                 }
-                rowsData.push(currentRow)
+
+                // сохраняем строки черновика
+                for (let i = 1; i < jdata.length; i++) {
+                    if (jdata[i].length !== 0) {
+                        let currentRow = {}
+                        for (let k = 0; k < jdata[i].length; k++) {
+                            currentRow.id = i - 1
+                            currentRow[columnsData[k]?.slug === undefined ? '' : `${columnsData[k]?.slug}`] = jdata[i][k] === undefined ? '' : jdata[i][k];
+                            currentRow.userId = currentUser._id
+                            currentRow.draftId = draftId
+                            currentRow.fullName = currentUser.surname + ' ' + currentUser.name + ' ' + currentUser.patronymic
+                        }
+                        await addDrafRow(currentRow)
+                    }
+                }
+                setIsLoading(false);
+                navigate(`/draft-table?draftId=${draftId}`, { replace: true });
             }
+
         }
-
-        columnsRef.current = columnsData;
-        uploadColumnsRef.current = columnsData;
-        rowsRef.current = rowsData;
-        uploadRowsRef.current = rowsData;
-
-        setState(() => true);
     };
-
-    const handleChecked = (event: any, params) => {
-        let updateColumns = uploadColumnsRef.current
-        for (let i = 0; i < updateColumns.length; i++) {
-            if (updateColumns[i].field === params.field) {
-                updateColumns[i].checked = event.target.checked
-            }
-        }
-        if (event.target.checked) {
-            for (let m = 0; m < rowsRef.current.length; m++) {
-                rowsRef.current[m][params.field] = uploadRowsRef.current[m][params.field]
-            }
-        } else {
-            let filterRows = rowsRef.current
-            // for (let n = 0; n < filterRows.length; n++) {
-            //     delete filterRows[n][params.field];
-            // }
-            rowsRef.current = filterRows
-            console.log('1', rowsRef.current)
-            console.log('2', uploadRowsRef.current)
-        }
-    }
-
-    const handleAutocomplete = async (event: any, value: any, params) => {
-        // let activeColumn = saveColumns.find(column => column.field === params.field);
-        // console.log('columnsData', columnsData)
-        // console.log('uploadColumns', uploadColumns)
-        // console.log('field', params.field)
-        // console.log('activeColumn', activeColumn)
-    }
-
-    const handleSaveTable = () => {
-        // получаем новые колонки которые нужно добавить
-        let filterColumns = columnsRef.current.filter(column => column.checked === true)
-        if (filterColumns) {
-            let saveRowsData = []
-            filterColumns.forEach((x) => {
-                if (!columns.find((item) => item.name == x.name))
-                    saveRowsData.push(x)
-            })
-            console.log('saveRowsData', saveRowsData)
-        }
-
-        // получаем строки которые нужно добавить
-        console.log('filterRows', rowsRef.current)
-    }
 
     return (
         <>
@@ -160,8 +131,13 @@ const Import = () => {
                     <Header user={currentUser} />
                     <Container sx={{ my: 3, textAlign: 'left' }} maxWidth="xl">
                         <Typography variant="h4" sx={{ mb: 2, color: '#333', textAlign: 'left' }}>Загрузите файл Excel</Typography>
-
-                        {uploadColumnsRef.current.length === 0 ?
+                        {drafts && drafts.length > 0 && !isLoading ?
+                            <div style={{ marginBottom: 20 }}>
+                                <Typography variant="h5" sx={{ mt: 2, mb: 3, color: '#333', textAlign: 'left' }}>У Вас есть несохраненные черновики</Typography>
+                                {drafts.map((draft) => <><Chip label={`${draft.name} от ${moment(draft.createdAt).format('DD.MM.YYYY')}`} sx={{ cursor: 'pointer', mb: 1, mr: 1 }} onClick={() => navigate(`/draft-table?draftId=${draft._id}`, { replace: true })} /><br /></>)}
+                            </div>
+                            : null}
+                        {!isLoading ?
                             <Button
                                 component="label"
                                 role={undefined}
@@ -177,15 +153,9 @@ const Import = () => {
                                     onChange={handleChangeFile}
                                     multiple
                                 />
-                            </Button> :
-                            <Button
-                                variant="contained"
-                                sx={{ mb: 3 }}
-                                onClick={handleSaveTable}
-                            >Сохранить</Button>
+                            </Button> : <Typography variant="h5" sx={{ mt: 2, color: '#333', textAlign: 'left' }}>Подождите, пока загрузится таблица...</Typography>
                         }
-                        {uploadColumnsRef.current && uploadColumnsRef.current.length > 0 && state ?
-                            <ImportTable columns={uploadColumnsRef.current} rows={uploadRowsRef.current} /> : null}
+
                     </Container>
                     <ChatWidget user={currentUser} />
                 </>

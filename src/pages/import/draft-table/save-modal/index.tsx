@@ -57,65 +57,63 @@ const SaveModal = ({ columns, companies, draftId, userId, open = false, handleCl
                 message: 'Вы не выбрали куда сохранять записи'
             })
             setOpenAlert(true);
-        }
-        // если новый лист - создаем
-        let listName = '';
-        if (data.get('newlist') != '') {
-            const newList = {
-                name: data.get('newlist'),
-                checked: false,
-                userId: data.get('user'),
-            }
-            await addList(newList as any).unwrap();
-            listName = newList.name;
         } else {
-            listName = data.get('list') ? lists?.find(l => l._id === data.get('list'))?.name : listName;
-        }
-
-        // Добавляем в записи название листа в listName и delListName
-        const companiesWithListName = companies?.map((c) => ({
-            ...c,
-            listName: listName,
-            delListName: listName
-        }))
-
-        // включаем loading
-        setLoading(true);
-
-        // добавляем колонки, если есть новые
-        if (columns.length > 0) {
-            for (let i = 0; i < columns.length; i++) {
-                await addColumn(columns[i]).unwrap();
+            // если новый лист - создаем
+            let listName = '';
+            if (data.get('newlist') != '') {
+                const newList = {
+                    name: data.get('newlist'),
+                    checked: false,
+                    userId: data.get('user'),
+                }
+                await addList(newList as any).unwrap();
+                listName = newList.name;
+            } else {
+                listName = data.get('list') ? lists?.find(l => l._id === data.get('list'))?.name : listName;
             }
-        }
 
-        // сохраняем записи
-        companiesWithListName.forEach(async (c) => {
-            await createCompany(c).unwrap();
-        })
+            // Добавляем в записи название листа в listName и delListName
+            const companiesWithListName = companies?.map((c) => ({
+                ...c,
+                listName: listName,
+                delListName: listName
+            }))
 
-        // удаляем строки черновика
-        if (draftrows && draftrows.length > 0) {
-            draftrows.forEach(async (row) => {
-                await deleteDraftRows(row).unwrap();
+            // включаем loading
+            setLoading(true);
+
+            // добавляем колонки, если есть новые
+            if (columns.length > 0) {
+                for (let i = 0; i < columns.length; i++) {
+                    await addColumn(columns[i]).unwrap();
+                }
+            }
+
+            // сохраняем записи
+            companiesWithListName.forEach(async (c) => {
+                await createCompany(c).unwrap();
             })
+
+            // удаляем строки черновика
+            if (draftrows && draftrows.length > 0) {
+                draftrows.forEach(async (row) => {
+                    await deleteDraftRows(row).unwrap();
+                })
+            }
+
+            // удаляем колонки черновика
+            if (draftcolumns && draftcolumns.length > 0) {
+                draftcolumns.forEach(async (column) => {
+                    await deleteDraftColumns(column).unwrap();
+                })
+            }
+
+            // удаляем черновик
+            await deleteDfart(draftId).unwrap();
+
+            // редирект на базу
+            navigate('/', { replace: true });
         }
-
-        // удаляем колонки черновика
-        if (draftcolumns && draftcolumns.length > 0) {
-            draftcolumns.forEach(async (column) => {
-                await deleteDraftColumns(column).unwrap();
-            })
-        }
-
-        // удаляем черновик
-        await deleteDfart(draftId).unwrap();
-
-        // редирект на базу
-        navigate('/', { replace: true });
-
-        console.log('columns', columns)
-        console.log('draftId', draftId)
     }
 
 

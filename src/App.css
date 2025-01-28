@@ -75,10 +75,18 @@ body {
 }
 
 .MuiDataGrid-row {
+  min-height: 66px !important;
+  max-height: 66px !important;
   max-height: 66px !important;
 }
 
+.MuiDataGrid-filler {
+  display: none !important;
+}
+
 .MuiDataGrid-cell {
+  min-height: 66px !important;
+  max-height: 66px !important;
   height: 66px !important;
 }
 

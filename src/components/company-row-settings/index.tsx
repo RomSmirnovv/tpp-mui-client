@@ -17,6 +17,7 @@ import AddNotificationModal from '../add-notification-modal';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ConfirmRecoveryCompany from '../confirm-recovery-company';
 import moment from 'moment';
+import { useGetNotificationsByUserQuery } from '../../redux/api/notificationApi';
 
 type Props = {
 	params: Object
@@ -31,6 +32,7 @@ const CompanyRowSettings = ({ params, options }: Props) => {
 	const [openEditList, setOpenEditList] = useState(false)
 	const [openNotification, setOpenNotification] = useState(false)
 	const [editCompany, { isLoading: isEditCompanyLoading }] = useEditCompanyMutation()
+	const { data: notifications } = useGetNotificationsByUserQuery(params.row.userId);
 
 
 	const handleOpenEdit = () => setOpenEdit(true)
@@ -76,7 +78,7 @@ const CompanyRowSettings = ({ params, options }: Props) => {
 				:
 				<>
 					<Box sx={{ display: 'flex', mt: 0.5 }}>
-						<AccessTimeIcon onClick={handleOpenNotification} sx={{ m: 0.1, fontSize: 18, cursor: 'pointer' }} titleAccess="Добавить уведомление" />
+						<AccessTimeIcon onClick={handleOpenNotification} sx={{ m: 0.1, fontSize: 18, cursor: 'pointer' }} titleAccess={notifications && notifications.find(n => n.companyId === params.row.id) ? notifications.find(n => n.companyId === params.row.id).notificationDateTime : `Добавить уведомление`} />
 						{params.row.favorite ?
 							<StarOutlinedIcon sx={{ m: 0.1, fontSize: 18, cursor: 'pointer', color: '#ceb129' }} titleAccess="Удалить из избранного" onClick={toggleStar} disabled={isEditCompanyLoading} />
 							:

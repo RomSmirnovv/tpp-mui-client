@@ -50,7 +50,7 @@ type Props = {
 const socket = io(BASE_URL);
 
 const Header = ({ user }: Props) => {
-	const {data: currentUser} = useGetUserQuery(null);
+	const { data: currentUser } = useGetUserQuery(null);
 	const navigate = useNavigate();
 	const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
 	const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
@@ -95,7 +95,7 @@ const Header = ({ user }: Props) => {
 	const handleLogout = async () => {
 		try {
 			await logout();
-			
+
 		} catch (error) {
 			const maybeError = isErrorWithMessage(error);
 
@@ -105,11 +105,11 @@ const Header = ({ user }: Props) => {
 				setError("Неизвестная ошибка");
 			}
 		}
-		navigate("/login", { replace: true });	
+		navigate("/login", { replace: true });
 	}
 
 	const handleSelectUser = (user: IUser) => {
-		if(currentUser._id === user._id) {
+		if (currentUser._id === user._id) {
 			navigate(`/`, { replace: true });
 			navigate(0)
 		} else {
@@ -218,7 +218,7 @@ const Header = ({ user }: Props) => {
 								: null}
 						</Menu>
 					</Box>
-					
+
 					<Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
 						<NavLink to="/" style={{ margin: '10px', color: 'white', display: 'block', fontWeight: '400' }}>База данных</NavLink>
 						{user.role == 2 ?
@@ -258,37 +258,37 @@ const Header = ({ user }: Props) => {
 							{notificationData && notificationData.length === 0 && <MenuItem><Typography textAlign="center">Нет уведомлений</Typography></MenuItem>}
 						</Menu>
 					</Box>
-					{currentUser.role == 2 ? 
-					<Box sx={{ flexGrow: 0 }}>
-						<Tooltip title="Выбрать пользователя">
-							<IconButton onClick={handleOpenUserMenuAdmin} sx={{ p: 0 }}>
-								<GroupIcon sx={{ width: '2rem', height: '2rem', color: 'white', mr: 2 }} />
-							</IconButton>
-						</Tooltip>
-						<Menu
-							sx={{ mt: '45px' }}
-							id="menu-appbar"
-							anchorEl={anchorElUserAdmin}
-							anchorOrigin={{
-								vertical: 'top',
-								horizontal: 'right',
-							}}
-							keepMounted
-							transformOrigin={{
-								vertical: 'top',
-								horizontal: 'right',
-							}}
-							open={Boolean(anchorElUserAdmin)}
-							onClose={handleCloseUserMenuAdmin}
-						>
-							{users && users.map((user: IUser) => (								
-								<MenuItem key={user._id} onClick={() => handleSelectUser(user)}>
-									<Typography textAlign="center">{user.surname} {user.name}</Typography>
-								</MenuItem>
-							))}
-						</Menu>
-					</Box>
-					: null}
+					{currentUser.role == 2 ?
+						<Box sx={{ flexGrow: 0 }}>
+							<Tooltip title="Выбрать пользователя">
+								<IconButton onClick={handleOpenUserMenuAdmin} sx={{ p: 0 }}>
+									<GroupIcon sx={{ width: '2rem', height: '2rem', color: 'white', mr: 2 }} />
+								</IconButton>
+							</Tooltip>
+							<Menu
+								sx={{ mt: '45px' }}
+								id="menu-appbar"
+								anchorEl={anchorElUserAdmin}
+								anchorOrigin={{
+									vertical: 'top',
+									horizontal: 'right',
+								}}
+								keepMounted
+								transformOrigin={{
+									vertical: 'top',
+									horizontal: 'right',
+								}}
+								open={Boolean(anchorElUserAdmin)}
+								onClose={handleCloseUserMenuAdmin}
+							>
+								{users && users.map((user: IUser) => (
+									<MenuItem key={user._id} onClick={() => handleSelectUser(user)}>
+										<Typography textAlign="center">{user.surname} {user.name}</Typography>
+									</MenuItem>
+								))}
+							</Menu>
+						</Box>
+						: null}
 
 					<Box sx={{ flexGrow: 0 }}>
 						<Tooltip title="Профиль">
@@ -313,7 +313,7 @@ const Header = ({ user }: Props) => {
 							onClose={handleCloseUserMenu}
 						>
 							<MenuItem key={settings[0]}>
-								<NavLink to="/profile" ><Typography textAlign="center">{settings[0]}</Typography></NavLink>
+								<NavLink to="/"><Typography onClick={() => navigate(`/`, { replace: true })} textAlign="center">{settings[0]}</Typography></NavLink>
 							</MenuItem>
 							<MenuItem key={settings[1]} onClick={handleLogout}>
 								<Typography textAlign="center">{settings[1]}</Typography>

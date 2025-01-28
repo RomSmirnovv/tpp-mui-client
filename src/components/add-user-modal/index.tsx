@@ -2,6 +2,7 @@ import { Alert, Box, Button, FormControl, InputLabel, MenuItem, Modal, Select, T
 import dayjs from 'dayjs';
 import { useCreateUserMutation } from '../../redux/api/userApi';
 import { IUser } from '../../redux/api/types';
+import { useState } from 'react';
 
 const style = {
 	position: 'absolute' as 'absolute',
@@ -17,6 +18,11 @@ const style = {
 const AddUserModal = ({ open = false, handleClose = () => { } }) => {
 	const [createUser, { isLoading: isCreateUserLoading, error: createUserError, isSuccess: isCreateUserSuccess }] = useCreateUserMutation();
 
+	const [message, setMessage] = useState('');
+	const handleLoginChange = (event) => {
+		const result = event.target.value.replace(/[^a-z, 0-9, @, _, -, .]/gi, '');
+		setMessage(result);
+	};
 	const handleAddUser = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const data = new FormData(event.currentTarget);
@@ -124,10 +130,12 @@ const AddUserModal = ({ open = false, handleClose = () => { } }) => {
 						required
 						fullWidth
 						id="login"
-						label="Логин"
+						label="Логин (латиницей)"
 						name="login"
 						autoComplete="login"
 						autoFocus
+						value={message}
+						onChange={handleLoginChange}
 					/>
 					<TextField
 						margin="normal"

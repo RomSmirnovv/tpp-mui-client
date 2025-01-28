@@ -214,7 +214,7 @@ const BaseTable = ({ user, setSelectedRows, handleOpenModal, handleCloseModal, o
 	}, [lists, companies, selectedList, isStar, filterColor, openModal, updateColumns]);
 
 	return (
-		<>
+		<Box sx={{ height: 800, width: '100%' }}>
 			<DataGrid
 				rows={companyes}
 				columns={columns}
@@ -237,11 +237,11 @@ const BaseTable = ({ user, setSelectedRows, handleOpenModal, handleCloseModal, o
 				onColumnWidthChange={onColumnWidthChanged}
 				processRowUpdate={processRowUpdate}
 				getRowId={(row) => row._id}
-				sx={{ mt: 1, mb: 2, height: '75vh', border: '1px solid #e0e0e0' }}
+				sx={{ mt: 1, border: '1px solid #e0e0e0' }}
 				getRowClassName={(params) => `row__color__${params.row.color && params.row.color.replace('#', '')} ${params.row.editIsAdmin ? 'row__height__large' : ''}`}
 				onRowSelectionModelChange={getSelectedRows}
 			/>
-		</>
+		</Box>
 	);
 }
 export default BaseTable;

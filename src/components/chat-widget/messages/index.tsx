@@ -3,7 +3,7 @@ import styles from '../index.module.css';
 import useSound from 'use-sound'
 import messageVoice from '../../../assets/voices/message.mp3'
 
-const Messages = ({ socket, user, setUnreadMessages }) => {
+const Messages = ({ socket, user, activeRoom, setUnreadMessages }) => {
 	const [messages, setMessages] = useState([]);
 	const [playSound] = useSound(messageVoice)
 
@@ -16,27 +16,36 @@ const Messages = ({ socket, user, setUnreadMessages }) => {
 		);
 	}
 
+	// Очищаем сообщения при смене активной комнаты
 	useEffect(() => {
+		setMessages([]);
+	}, [activeRoom]);
+
+	useEffect(() => {
+		if (!socket) return;
+
 		socket.on('getMessage', ({ message }) => {
 			setMessages((prev) => [...prev, message])
-			if (message.userId !== user._id) {
+			if (message.userId !== user?._id) {
 				playSound();
 				setUnreadMessages(() => true);
 			}
 		});
 
 		return () => socket.off('getMessage');
-	}, [socket]);
+	}, [socket, user?._id, playSound, setUnreadMessages]);
 
 
 	useEffect(() => {
+		if (!socket) return;
+
 		socket.on('getAllMessages', (data) => {
 			let messagesData = sortMessagesByDate(data);
 			setMessages(messagesData);
 		});
 
 		return () => socket.off('getAllMessages');
-	}, [socket]);
+	}, [socket, activeRoom]); // Добавили activeRoom в зависимости
 
 	useEffect(() => {
 		if (messages.length > 2) {

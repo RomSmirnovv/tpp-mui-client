@@ -102,6 +102,7 @@ body {
   height: 81px !important;
 }
 
+/* Старые классы для обратной совместимости (будут удалены после миграции) */
 .row__color__ef7575 {
   background-color: #ef757596 !important;
 }
@@ -113,6 +114,8 @@ body {
 .row__color__84d166 {
   background-color: #84d166a1 !important;
 }
+
+/* Новые динамические классы будут применяться через sx prop в BaseTable */
 
 button:focus,
 button:focus-visible {

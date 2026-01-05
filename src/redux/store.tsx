@@ -10,6 +10,7 @@ import { notificationApi } from './api/notificationApi';
 import { draftColumnsApi } from './api/draftColumnsApi';
 import { draftRowsApi } from './api/draftRowsApi';
 import { draftsApi } from './api/draftsApi';
+import { workspaceApi } from './api/workspaceApi';
 
 export const store = configureStore({
 	reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
 		[draftColumnsApi.reducerPath]: draftColumnsApi.reducer,
 		[draftRowsApi.reducerPath]: draftRowsApi.reducer,
 		[draftsApi.reducerPath]: draftsApi.reducer,
+		[workspaceApi.reducerPath]: workspaceApi.reducer,
 		authState: authApi.reducer,
 		userState: userReducer,
 		listState: listApi.reducer,
@@ -31,9 +33,10 @@ export const store = configureStore({
 		draftColumnsState: draftColumnsApi.reducer,
 		draftRowsState: draftRowsApi.reducer,
 		draftsState: draftsApi.reducer,
+		workspaceState: workspaceApi.reducer,
 	},
 	middleware: (getDefaultMiddleware) =>
-		getDefaultMiddleware({}).concat([authApi.middleware, userApi.middleware, listApi.middleware, columnApi.middleware, companyApi.middleware, notificationApi.middleware, draftColumnsApi.middleware, draftRowsApi.middleware, draftsApi.middleware]),
+		getDefaultMiddleware({}).concat([authApi.middleware, userApi.middleware, listApi.middleware, columnApi.middleware, companyApi.middleware, notificationApi.middleware, draftColumnsApi.middleware, draftRowsApi.middleware, draftsApi.middleware, workspaceApi.middleware]),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -4,47 +4,62 @@ import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
-import BusinessIcon from '@mui/icons-material/Business';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { useRegisterWorkspaceMutation } from '../../redux/api/workspaceApi';
+import { useGetWorkspaceQuery, useUpdateWorkspaceMutation } from '../../redux/api/workspaceApi';
 import { isErrorWithMessage } from "../../utils/is-error-with-message";
-import { useNavigate } from 'react-router-dom';
-import { Alert, Grid, InputAdornment, IconButton, Chip, Stack } from '@mui/material';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Alert, Grid, IconButton, Chip } from '@mui/material';
 import Copyright from '../../components/copyright';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import Header from '../../components/header';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs, { Dayjs } from 'dayjs';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { BASE_URL, RECAPTCHA_SITE_KEY } from '../../config';
-import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { BASE_URL } from '../../config';
+import EditIcon from '@mui/icons-material/Edit';
 
-const RegisterForm = () => {
+const EditWorkspace = () => {
+	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
 	const [error, setError] = React.useState("");
-	const [registerWorkspace, { isLoading, error: registerError }] = useRegisterWorkspaceMutation();
-	const { executeRecaptcha } = useGoogleReCaptcha();
+	
+	const { data: workspace, isLoading: isLoadingData, error: fetchError, refetch: refetchWorkspace } = useGetWorkspaceQuery(id || '');
+	const [updateWorkspace, { isLoading: isUpdating, error: updateError }] = useUpdateWorkspaceMutation();
 	
 	// Состояния формы
 	const [companyName, setCompanyName] = React.useState("");
 	const [logo, setLogo] = React.useState<File | null>(null);
 	const [logoPreview, setLogoPreview] = React.useState<string>("");
+	const [removeLogo, setRemoveLogo] = React.useState(false);
 	const [colors, setColors] = React.useState<string[]>(['#ff0000', '#ffff00', '#00ff00']); // Красный, желтый, зеленый по умолчанию
 	const [email, setEmail] = React.useState("");
 	const [phone, setPhone] = React.useState("");
 	const [employeesCount, setEmployeesCount] = React.useState(1);
+	const [columns, setColumns] = React.useState<string[]>([]);
 	
-	// Данные администратора
-	const [adminName, setAdminName] = React.useState("");
-	const [adminSurname, setAdminSurname] = React.useState("");
-	const [adminPatronymic, setAdminPatronymic] = React.useState("");
-	const [adminRole, setAdminRole] = React.useState("");
-	const [adminBirthDate, setAdminBirthDate] = React.useState<Dayjs | null>(null);
-	const [adminLogin, setAdminLogin] = React.useState("");
-	const [adminPassword, setAdminPassword] = React.useState("");
-	const [adminPasswordConfirm, setAdminPasswordConfirm] = React.useState("");
+
+	// Загрузка данных workspace
+	React.useEffect(() => {
+		if (workspace) {
+			setCompanyName(workspace.name || '');
+			setEmail(workspace.email || '');
+			setPhone(workspace.phone || '');
+			setEmployeesCount(workspace.employeesCount || 1);
+			// Если есть сохраненные цвета, используем их, иначе дефолтные
+			setColors(workspace.colors && workspace.colors.length > 0 ? workspace.colors : ['#ff0000', '#ffff00', '#00ff00']);
+			setColumns(workspace.columns || []);
+			
+			if (workspace.logo) {
+				setLogoPreview(`${BASE_URL}${workspace.logo}`);
+			} else {
+				setLogoPreview("");
+			}
+			// Сбрасываем флаг удаления и локальный файл при загрузке данных
+			setRemoveLogo(false);
+			setLogo(null);
+		}
+	}, [workspace]);
 
 	// Обработка загрузки логотипа
 	const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,6 +70,7 @@ const RegisterForm = () => {
 				return;
 			}
 			setLogo(file);
+			setRemoveLogo(false); // Сбрасываем флаг удаления при загрузке нового логотипа
 			const reader = new FileReader();
 			reader.onloadend = () => {
 				setLogoPreview(reader.result as string);
@@ -66,6 +82,7 @@ const RegisterForm = () => {
 	const handleRemoveLogo = () => {
 		setLogo(null);
 		setLogoPreview("");
+		setRemoveLogo(true);
 	};
 
 
@@ -74,44 +91,20 @@ const RegisterForm = () => {
 		setError("");
 
 		// Валидация
-		if (!companyName || !email || !phone || !adminName || !adminSurname || !adminLogin || !adminPassword) {
+		if (!companyName || !email || !phone) {
 			setError("Заполните все обязательные поля");
 			return;
 		}
 
-		if (adminPassword !== adminPasswordConfirm) {
-			setError("Пароли не совпадают");
-			return;
-		}
-
-		if (adminPassword.length < 6) {
-			setError("Пароль должен содержать минимум 6 символов");
-			return;
-		}
-
-		// Получение reCaptcha токена
-		let recaptchaToken = '';
-		if (!executeRecaptcha) {
-			console.warn('executeRecaptcha не готов. Проверьте, что GoogleReCaptchaProvider правильно настроен.');
-		}
-		if (executeRecaptcha && RECAPTCHA_SITE_KEY) {
-			try {
-				recaptchaToken = await executeRecaptcha('register');
-				console.log('reCaptcha токен получен:', recaptchaToken ? 'да' : 'нет');
-			} catch (recaptchaError) {
-				console.error('Ошибка reCaptcha:', recaptchaError);
-				setError("Ошибка проверки reCaptcha. Попробуйте еще раз.");
-				return;
-			}
-		} else {
-			console.warn('reCaptcha не настроен. RECAPTCHA_SITE_KEY:', RECAPTCHA_SITE_KEY ? 'установлен' : 'не установлен');
-		}
-
 		// Создание FormData
 		const formData = new FormData();
-		formData.append('companyName', companyName);
+		formData.append('name', companyName);
 		if (logo) {
 			formData.append('logo', logo);
+		}
+		// Если логотип нужно удалить
+		if (removeLogo) {
+			formData.append('removeLogo', 'true');
 		}
 		colors.forEach((color, index) => {
 			formData.append(`colors[${index}]`, color);
@@ -119,45 +112,61 @@ const RegisterForm = () => {
 		formData.append('email', email);
 		formData.append('phone', phone);
 		formData.append('employeesCount', employeesCount.toString());
-		formData.append('adminName', adminName);
-		formData.append('adminSurname', adminSurname);
-		if (adminPatronymic) {
-			formData.append('adminPatronymic', adminPatronymic);
-		}
-		if (adminRole) {
-			formData.append('adminRole', adminRole);
-		}
-		if (adminBirthDate) {
-			formData.append('adminBirthDate', adminBirthDate.format('YYYY-MM-DD'));
-		}
-		formData.append('adminLogin', adminLogin);
-		formData.append('adminPassword', adminPassword);
-		if (recaptchaToken) {
-			formData.append('recaptchaToken', recaptchaToken);
-		}
+		
+		// Колонки
+		columns.forEach((column, index) => {
+			formData.append(`columns[${index}]`, column);
+		});
 
 		try {
-			const result = await registerWorkspace(formData).unwrap();
-			// После успешной регистрации перенаправляем на страницу входа с сообщением о подтверждении email
-			navigate("/login", { 
-				state: { 
-					message: "Компания успешно зарегистрирована. Проверьте email для подтверждения регистрации." 
-				} 
-			});
+			await updateWorkspace({ id: id || '', data: formData }).unwrap();
+			// Сбрасываем флаг удаления после успешного сохранения
+			setRemoveLogo(false);
+			// Обновляем данные workspace для обновления кеша
+			await refetchWorkspace();
+			// После успешного обновления перенаправляем на главную страницу
+			// или можно показать сообщение об успехе и остаться на странице
+			alert("Данные компании успешно обновлены!");
+			// Остаемся на странице редактирования или перенаправляем на главную
+			// navigate("/", { state: { message: "Данные компании успешно обновлены." } });
 		} catch (error) {
 			const maybeError = isErrorWithMessage(error);
 			if (maybeError) {
-				setError((error as any).data?.error || "Ошибка при регистрации");
+				setError((error as any).data?.error || "Ошибка при обновлении");
 			} else {
 				setError("Неизвестная ошибка");
 			}
 		}
 	};
 
-	return (
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
+	if (isLoadingData) {
+		return (
 			<Container component="main" maxWidth="md">
-				<CssBaseline />
+				<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+					<Typography>Загрузка данных...</Typography>
+				</Box>
+			</Container>
+		);
+	}
+
+	if (fetchError || !workspace) {
+		return (
+			<Container component="main" maxWidth="md">
+				<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+					<Alert severity="error">
+						{isErrorWithMessage(fetchError) ? (fetchError as any).data?.error : "Ошибка загрузки данных компании"}
+					</Alert>
+				</Box>
+			</Container>
+		);
+	}
+
+	return (
+		<>
+			<Header />
+			<LocalizationProvider dateAdapter={AdapterDayjs}>
+				<Container component="main" maxWidth="md">
+					<CssBaseline />
 				<Box
 					sx={{
 						marginTop: 4,
@@ -168,10 +177,10 @@ const RegisterForm = () => {
 					}}
 				>
 					<Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-						<BusinessIcon />
+						<EditIcon />
 					</Avatar>
 					<Typography component="h1" variant="h5">
-						Регистрация компании
+						Редактирование компании
 					</Typography>
 					<Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, width: '100%' }}>
 						<Grid container spacing={2}>
@@ -336,109 +345,7 @@ const RegisterForm = () => {
 								</Box>
 							</Grid>
 
-							{/* Данные администратора */}
-							<Grid item xs={12}>
-								<Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-									Данные администратора
-								</Typography>
-							</Grid>
 
-							<Grid item xs={12} sm={4}>
-								<TextField
-									required
-									fullWidth
-									id="adminSurname"
-									label="Фамилия"
-									name="adminSurname"
-									value={adminSurname}
-									onChange={(e) => setAdminSurname(e.target.value)}
-								/>
-							</Grid>
-
-							<Grid item xs={12} sm={4}>
-								<TextField
-									required
-									fullWidth
-									id="adminName"
-									label="Имя"
-									name="adminName"
-									value={adminName}
-									onChange={(e) => setAdminName(e.target.value)}
-								/>
-							</Grid>
-
-							<Grid item xs={12} sm={4}>
-								<TextField
-									fullWidth
-									id="adminPatronymic"
-									label="Отчество"
-									name="adminPatronymic"
-									value={adminPatronymic}
-									onChange={(e) => setAdminPatronymic(e.target.value)}
-								/>
-							</Grid>
-
-							<Grid item xs={12} sm={6}>
-								<TextField
-									fullWidth
-									id="adminRole"
-									label="Роль в компании"
-									name="adminRole"
-									value={adminRole}
-									onChange={(e) => setAdminRole(e.target.value)}
-								/>
-							</Grid>
-
-							<Grid item xs={12} sm={6}>
-								<DatePicker
-									label="День рождения"
-									value={adminBirthDate}
-									onChange={(newValue) => setAdminBirthDate(newValue)}
-									slotProps={{
-										textField: {
-											fullWidth: true,
-										},
-									}}
-								/>
-							</Grid>
-
-							<Grid item xs={12} sm={6}>
-								<TextField
-									required
-									fullWidth
-									id="adminLogin"
-									label="Логин"
-									name="adminLogin"
-									value={adminLogin}
-									onChange={(e) => setAdminLogin(e.target.value)}
-								/>
-							</Grid>
-
-							<Grid item xs={12} sm={6}>
-								<TextField
-									required
-									fullWidth
-									name="adminPassword"
-									label="Пароль"
-									type="password"
-									id="adminPassword"
-									value={adminPassword}
-									onChange={(e) => setAdminPassword(e.target.value)}
-								/>
-							</Grid>
-
-							<Grid item xs={12} sm={6}>
-								<TextField
-									required
-									fullWidth
-									name="adminPasswordConfirm"
-									label="Подтвердите пароль"
-									type="password"
-									id="adminPasswordConfirm"
-									value={adminPasswordConfirm}
-									onChange={(e) => setAdminPasswordConfirm(e.target.value)}
-								/>
-							</Grid>
 						</Grid>
 
 						{error && (
@@ -447,9 +354,9 @@ const RegisterForm = () => {
 							</Alert>
 						)}
 
-						{registerError && (
+						{updateError && (
 							<Alert severity="error" sx={{ mt: 2 }}>
-								{(registerError as any).data?.error || "Ошибка при регистрации"}
+								{(updateError as any).data?.error || "Ошибка при обновлении"}
 							</Alert>
 						)}
 
@@ -458,43 +365,25 @@ const RegisterForm = () => {
 							fullWidth
 							variant="contained"
 							sx={{ mt: 3, mb: 2 }}
-							disabled={isLoading}
+							disabled={isUpdating}
 						>
-							{isLoading ? "Регистрация..." : "Зарегистрировать компанию"}
+							{isUpdating ? "Сохранение..." : "Сохранить изменения"}
 						</Button>
 
 						<Button
 							fullWidth
 							variant="text"
-							onClick={() => navigate("/login")}
+							onClick={() => navigate("/")}
 						>
-							Уже есть аккаунт? Войти
+							Отмена
 						</Button>
 					</Box>
 				</Box>
 				<Copyright sx={{ mt: 4, mb: 4 }} />
 			</Container>
 		</LocalizationProvider>
+		</>
 	);
 };
 
-const Register = () => {
-	if (!RECAPTCHA_SITE_KEY) {
-		console.warn('⚠️  RECAPTCHA_SITE_KEY не установлен. reCaptcha будет отключен.');
-		return (
-			<GoogleReCaptchaProvider
-				reCaptchaKey={RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'} // Тестовый ключ
-			>
-				<RegisterForm />
-			</GoogleReCaptchaProvider>
-		);
-	}
-
-	return (
-		<GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
-			<RegisterForm />
-		</GoogleReCaptchaProvider>
-	);
-};
-
-export default Register;
+export default EditWorkspace;

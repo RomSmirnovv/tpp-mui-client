@@ -13,6 +13,7 @@ export interface IUser {
 	role: number;
 	birthDate: string;
 	phone: string;
+	workspaceId?: string;
 }
 
 export interface IGenericResponse {

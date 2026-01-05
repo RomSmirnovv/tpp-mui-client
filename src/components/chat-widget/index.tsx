@@ -4,27 +4,26 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
-import { Badge, Box, TextField } from '@mui/material';
+import { Badge, Box, TextField, CircularProgress } from '@mui/material';
 import Brightness1Icon from '@mui/icons-material/Brightness1';
 import styles from './index.module.css';
-import { io } from 'socket.io-client';
 import { IUser } from '../../redux/api/types';
 import Messages from './messages';
 import Rooms from './rooms/index.tsx';
 import SendMessage from './sendMessage/index.tsx';
-import { BASE_URL } from '../../config.ts';
 import { useGetUserQuery } from '../../redux/api/userApi.ts';
-
-const socketChat = io(BASE_URL);
-
-type Props = {
-	user: IUser
-}
+import { useSocket } from '../../contexts/SocketContext';
 
 const ChatWidget = () => {
 	const {data: user} = useGetUserQuery(null)
+	const socket = useSocket();
 	const [activeRoom, setActiveRoom] = React.useState('all-chat');
 	const [unreadMessages, setUnreadMessages] = React.useState(false);
+
+	// Не показываем виджет, если socket не готов или пользователь не загружен
+	if (!socket || !user) {
+		return null;
+	}
 
 	return (
 		<Box sx={{ width: '400px', position: 'fixed', right: 30, bottom: 0, zIndex: 99 }}>
@@ -40,13 +39,13 @@ const ChatWidget = () => {
 				</AccordionSummary>
 				<AccordionDetails>
 					<Box sx={{ display: 'flex' }}>
-						<Rooms socket={socketChat} user={user} activeRoom={activeRoom} setActiveRoom={setActiveRoom} setUnreadMessages={setUnreadMessages} />
+						<Rooms socket={socket} user={user} activeRoom={activeRoom} setActiveRoom={setActiveRoom} setUnreadMessages={setUnreadMessages} />
 						<div style={{ height: '650px', width: '85%', backgroundColor: 'white', border: '1px solid #e7e7e7', borderRadius: '0 5px 5px 0' }}>
 							<div className={styles.chat__messages}>
-								<Messages socket={socketChat} user={user} setUnreadMessages={setUnreadMessages} />
+								<Messages socket={socket} user={user} activeRoom={activeRoom} setUnreadMessages={setUnreadMessages} />
 							</div>
 							<div className={styles.chat__form}>
-								<SendMessage socket={socketChat} user={user} activeRoom={activeRoom} setUnreadMessages={setUnreadMessages} />
+								<SendMessage socket={socket} user={user} activeRoom={activeRoom} setUnreadMessages={setUnreadMessages} />
 							</div>
 						</div>
 					</Box>

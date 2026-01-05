@@ -20,6 +20,8 @@ import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { useGetAllColumnsQuery, useGetColumnsQuery } from '../../redux/api/columnsApi';
 import { useNavigate } from 'react-router-dom';
+import { useGetUserQuery } from '../../redux/api/userApi';
+import { useGetWorkspaceQuery, useGetWorkspaceByUserIdQuery } from '../../redux/api/workspaceApi';
 
 
 const formatInitialColumns = (columns: GridColDef[]) => {
@@ -54,13 +56,31 @@ const BaseTable = ({ user, setSelectedRows, handleOpenModal, handleCloseModal, o
 	const [selectedList, setSelectedList] = useState<IList | null>(null)
 	const { data: lists, isSuccess: isListsSuccess, isLoading: isListsLoading } = useGetListByUserQuery(user._id);
 	const [editList, { isSuccess: isEdited, isLoading: isEditing }] = useEditListMutation();
-	const { data: companies, isSuccess: isCompaniesSuccess } = useGetCompaniesQuery(user._id);
+	const { data: companies, isSuccess: isCompaniesSuccess, refetch: refetchCompanies } = useGetCompaniesQuery(user._id);
 	const { data: allcolumns, isSuccess: isAllColumnsSuccess } = useGetAllColumnsQuery();
 	const [editCompany, { isSuccess: isEditCompanySuccess, isLoading: isEditCompanyLoading }] = useEditCompanyMutation();
 	const [isStar, setIsStar] = useState(false);
 	const [filterCompanies, setFilterCompanies] = useState([])
-	const [filterColor, setFilterColor] = useState('');
+	const [filterColor, setFilterColor] = useState<number | null>(null);
 	const navigate = useNavigate();
+	
+	// Получаем workspace для цветов
+	const { data: currentUserData } = useGetUserQuery(null);
+	const workspaceId = currentUserData?.workspaceId || user?.workspaceId;
+	const workspaceIdString = workspaceId && typeof workspaceId === 'object' 
+		? (workspaceId._id || workspaceId.toString()) 
+		: workspaceId?.toString();
+	const { data: workspace } = useGetWorkspaceQuery(workspaceIdString || '', { 
+		skip: !workspaceIdString 
+	});
+	const { data: workspaceByUser } = useGetWorkspaceByUserIdQuery(
+		currentUserData?._id?._id || currentUserData?._id || user?._id?._id || user?._id || '',
+		{ skip: (workspaceIdString || !currentUserData && !user) }
+	);
+	const currentWorkspace = workspace || workspaceByUser;
+	const colors = currentWorkspace?.colors && currentWorkspace.colors.length > 0 
+		? currentWorkspace.colors 
+		: ['#ff0000', '#ffff00', '#00ff00'];
 
 
 
@@ -184,9 +204,21 @@ const BaseTable = ({ user, setSelectedRows, handleOpenModal, handleCloseModal, o
 							return (
 								<div style={{ display: 'flex', alignItems: 'center' }}>Цвет
 									<div style={{ display: 'flex', marginLeft: 2 }}>
-										{filterColor === '#ef7575' ? <RadioButtonCheckedIcon onClick={() => setFilterColor(() => '')} sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: '#ef7575' }} /> : <RadioButtonUncheckedIcon onClick={() => setFilterColor(() => '#ef7575')} sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: '#ef7575' }} />}
-										{filterColor === '#ffe51d' ? <RadioButtonCheckedIcon onClick={() => setFilterColor(() => '')} sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: '#ffe51d' }} /> : <RadioButtonUncheckedIcon onClick={() => setFilterColor(() => '#ffe51d')} sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: '#ffe51d' }} />}
-										{filterColor === '#84d166' ? <RadioButtonCheckedIcon onClick={() => setFilterColor(() => '')} sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: '#84d166' }} /> : <RadioButtonUncheckedIcon onClick={() => setFilterColor(() => '#84d166')} sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: '#84d166' }} />}
+										{colors.map((color, index) => (
+											filterColor === index ? (
+												<RadioButtonCheckedIcon 
+													key={index}
+													onClick={() => setFilterColor(null)} 
+													sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: color }} 
+												/>
+											) : (
+												<RadioButtonUncheckedIcon 
+													key={index}
+													onClick={() => setFilterColor(index)} 
+													sx={{ fontSize: 15, lineHeight: 0, cursor: 'pointer', color: color }} 
+												/>
+											)
+										))}
 									</div>
 								</div>
 							)
@@ -207,11 +239,45 @@ const BaseTable = ({ user, setSelectedRows, handleOpenModal, handleCloseModal, o
 				return { ...company, id: company._id }
 			})
 			if (isStar) companiesData = companiesData.filter((company) => company.favorite === true);
-			if (filterColor !== '') companiesData = companiesData.filter((company) => company.color === filterColor);
+			// Фильтрация по цвету: сравниваем индекс или старый hex код
+			if (filterColor !== null) {
+				companiesData = companiesData.filter((company) => {
+					const companyColorIndex = typeof company.color === 'number' 
+						? company.color 
+						: (company.color && getColorIndexFromValue(company.color, colors));
+					return companyColorIndex === filterColor;
+				});
+			}
 			setCompanyes(companiesData)
 			setFilterCompanies(companiesData)
 		}
-	}, [lists, companies, selectedList, isStar, filterColor, openModal, updateColumns]);
+	}, [lists, companies, selectedList, isStar, filterColor, openModal, updateColumns, colors]);
+	
+	// Функция для получения индекса цвета из значения (для обратной совместимости)
+	const getColorIndexFromValue = useCallback((colorValue: string | number, colorArray: string[]): number | null => {
+		if (typeof colorValue === 'number') {
+			return colorValue;
+		}
+		if (!colorValue || colorValue === '') {
+			return null;
+		}
+		// Если это hex код, ищем соответствующий индекс
+		for (let i = 0; i < colorArray.length; i++) {
+			if (colorValue === colorArray[i]) {
+				return i;
+			}
+		}
+		// Старые хардкодные цвета для обратной совместимости
+		const oldColors: { [key: string]: number } = {
+			'#ef7575': 0,
+			'#ffe51d': 1,
+			'#84d166': 2
+		};
+		if (oldColors[colorValue]) {
+			return oldColors[colorValue];
+		}
+		return null;
+	}, []);
 
 	return (
 		<Box sx={{ height: 800, width: '100%' }}>
@@ -237,8 +303,104 @@ const BaseTable = ({ user, setSelectedRows, handleOpenModal, handleCloseModal, o
 				onColumnWidthChange={onColumnWidthChanged}
 				processRowUpdate={processRowUpdate}
 				getRowId={(row) => row._id}
-				sx={{ mt: 1, border: '1px solid #e0e0e0' }}
-				getRowClassName={(params) => `row__color__${params.row.color && params.row.color.replace('#', '')} ${params.row.editIsAdmin ? 'row__height__large' : ''}`}
+				getRowClassName={(params) => {
+					// Получаем цвет строки
+					const rowColor = params.row.color;
+					
+					// Определяем индекс цвета
+					let colorIndex: number | null = null;
+					
+					if (rowColor !== undefined && rowColor !== null && rowColor !== '') {
+						if (typeof rowColor === 'number') {
+							colorIndex = rowColor;
+						} else if (typeof rowColor === 'string') {
+							// Если это строка-число (например, "0", "1", "2"), конвертируем в число
+							const numValue = Number(rowColor);
+							if (!isNaN(numValue) && numValue >= 0 && numValue < colors.length) {
+								colorIndex = numValue;
+							} else {
+								colorIndex = getColorIndexFromValue(rowColor, colors);
+							}
+						}
+					}
+					
+					// Формируем классы
+					const classes = [];
+					if (params.row.editIsAdmin) {
+						classes.push('row__height__large');
+					}
+					if (colorIndex !== null && colorIndex !== undefined && colorIndex >= 0 && colorIndex < colors.length) {
+						classes.push(`row__color__custom_${colorIndex}`);
+					}
+					
+					return classes.join(' ');
+				}}
+				getRowStyle={(params) => {
+					// Получаем цвет строки
+					const rowColor = params.row.color;
+					
+					// Определяем индекс цвета
+					let colorIndex: number | null = null;
+					
+					if (rowColor !== undefined && rowColor !== null && rowColor !== '') {
+						if (typeof rowColor === 'number') {
+							colorIndex = rowColor;
+						} else if (typeof rowColor === 'string') {
+							// Если это строка-число (например, "0", "1", "2"), конвертируем в число
+							const numValue = Number(rowColor);
+							if (!isNaN(numValue) && numValue >= 0 && numValue < colors.length) {
+								colorIndex = numValue;
+							} else {
+								colorIndex = getColorIndexFromValue(rowColor, colors);
+							}
+						}
+					}
+					
+					// Применяем цвет, если индекс валидный
+					if (colorIndex !== null && colorIndex !== undefined && colorIndex >= 0 && colorIndex < colors.length && colors[colorIndex]) {
+						// Применяем цвет с прозрачностью
+						const opacity = colorIndex === 0 ? '96' : colorIndex === 1 ? '9c' : 'a1';
+						const backgroundColor = `${colors[colorIndex]}${opacity}`;
+						
+						return {
+							backgroundColor: backgroundColor
+						};
+					}
+					
+					return {};
+				}}
+				sx={{ 
+					mt: 1, 
+					border: '1px solid #e0e0e0',
+					// Применяем стили к строкам с цветом, включая выбранные строки
+					'& .MuiDataGrid-row.row__color__custom_0': {
+						backgroundColor: `${colors[0]}96 !important`,
+						'&.Mui-selected': {
+							backgroundColor: `${colors[0]}96 !important`
+						},
+						'&:hover': {
+							backgroundColor: `${colors[0]}96 !important`
+						}
+					},
+					'& .MuiDataGrid-row.row__color__custom_1': {
+						backgroundColor: `${colors[1]}9c !important`,
+						'&.Mui-selected': {
+							backgroundColor: `${colors[1]}9c !important`
+						},
+						'&:hover': {
+							backgroundColor: `${colors[1]}9c !important`
+						}
+					},
+					'& .MuiDataGrid-row.row__color__custom_2': {
+						backgroundColor: `${colors[2]}a1 !important`,
+						'&.Mui-selected': {
+							backgroundColor: `${colors[2]}a1 !important`
+						},
+						'&:hover': {
+							backgroundColor: `${colors[2]}a1 !important`
+						}
+					}
+				}}
 				onRowSelectionModelChange={getSelectedRows}
 			/>
 		</Box>

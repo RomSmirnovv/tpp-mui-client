@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { useLoginUserMutation } from '../../redux/api/authApi';
 import { isErrorWithMessage } from "../../utils/is-error-with-message";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { Alert } from '@mui/material';
 import Copyright from '../../components/copyright';
@@ -19,9 +19,18 @@ import Copyright from '../../components/copyright';
 
 const Login = () => {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const [error, setError] = React.useState("");
 	const [login, { isLoading, error: loginError }] = useLoginUserMutation();
 	const [cookies] = useCookies(['logged_in']);
+
+	// Проверяем сообщение из state (например, после регистрации)
+	React.useEffect(() => {
+		const state = location.state as { message?: string } | null;
+		if (state?.message) {
+			setError(state.message);
+		}
+	}, [location]);
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -35,7 +44,13 @@ const Login = () => {
 			const maybeError = isErrorWithMessage(error);
 
 			if (maybeError) {
-				setError(loginError?.data.error);
+				const errorData = (error as any).data;
+				// Проверяем, является ли ошибка связанной с неподтвержденным email
+				if (errorData?.error === 'EMAIL_NOT_VERIFIED' || errorData?.error === 'Email не подтвержден') {
+					setError('Email не подтвержден. Проверьте почту и перейдите по ссылке для подтверждения.');
+				} else {
+					setError(errorData?.error || loginError?.data?.error || "Ошибка при входе");
+				}
 			} else {
 				setError("Неизвестная ошибка");
 			}
@@ -93,9 +108,16 @@ const Login = () => {
 					>
 						Войти
 					</Button>
-					{loginError && <Alert severity="error">
-						{loginError.data.error}
-					</Alert>}
+					{error && (
+						<Alert severity={error.includes('успешно') || error.includes('подтвержден') ? 'info' : 'error'} sx={{ mt: 2 }}>
+							{error}
+						</Alert>
+					)}
+					{loginError && !error && (
+						<Alert severity="error" sx={{ mt: 2 }}>
+							{loginError.data?.error || "Ошибка при входе"}
+						</Alert>
+					)}
 				</Box>
 			</Box>
 			<Copyright sx={{ mt: 8, mb: 4 }} />

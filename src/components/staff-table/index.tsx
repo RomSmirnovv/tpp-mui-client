@@ -1,7 +1,8 @@
 import * as React from 'react';
+import { useMemo } from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useEditUserMutation, useGetAllUsersQuery } from '../../redux/api/userApi';
+import { useEditUserMutation, useGetAllUsersQuery, useGetUserQuery } from '../../redux/api/userApi';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import ConfirmDialog from '../confirm-dialog';
 import BlockUser from '../block-user';
@@ -11,7 +12,32 @@ const StaffTable = () => {
 	const [open, setOpen] = React.useState(false);
 	const [rows, setRows] = React.useState([]);
 	const { data: users, isSuccess: isUsersSuccess, isLoading: isUsersLoading } = useGetAllUsersQuery(null);
+	const { data: currentUser } = useGetUserQuery(null);
 	const [editUser, { error: editUserError, isLoading: isEditing, isSuccess: isEdited }] = useEditUserMutation();
+
+	// Фильтруем пользователей по workspaceId текущего пользователя
+	const filteredUsers = useMemo(() => {
+		if (!users || !currentUser?.workspaceId) return [];
+		
+		// Получаем workspaceId текущего пользователя
+		let currentWorkspaceId = currentUser.workspaceId;
+		if (typeof currentWorkspaceId === 'object') {
+			currentWorkspaceId = currentWorkspaceId._id || currentWorkspaceId.toString();
+		} else {
+			currentWorkspaceId = currentWorkspaceId.toString();
+		}
+		
+		// Фильтруем пользователей по workspaceId
+		return users.filter(u => {
+			let userWorkspaceId = u.workspaceId;
+			if (typeof userWorkspaceId === 'object') {
+				userWorkspaceId = userWorkspaceId._id || userWorkspaceId.toString();
+			} else if (userWorkspaceId) {
+				userWorkspaceId = userWorkspaceId.toString();
+			}
+			return userWorkspaceId === currentWorkspaceId;
+		});
+	}, [users, currentUser?.workspaceId]);
 
 
 	const handleOpen = (userId: any) => {
@@ -78,21 +104,21 @@ const StaffTable = () => {
 	let usersData: any = [];
 	React.useEffect(() => {
 		setRows([]);
-		if (isUsersSuccess && users) {
-			for (let i = 0; i < users.length; i++) {
+		if (isUsersSuccess && filteredUsers) {
+			for (let i = 0; i < filteredUsers.length; i++) {
 				usersData[i] = {
-					_id: users[i]._id,
-					surname: users[i].surname,
-					name: users[i].name,
-					patronymic: users[i].patronymic,
-					login: users[i].login,
-					phone: users[i].phone,
-					blocked: users[i].blocked
+					_id: filteredUsers[i]._id,
+					surname: filteredUsers[i].surname,
+					name: filteredUsers[i].name,
+					patronymic: filteredUsers[i].patronymic,
+					login: filteredUsers[i].login,
+					phone: filteredUsers[i].phone,
+					blocked: filteredUsers[i].blocked
 				}
 			}
 			setRows(usersData);
 		}
-	}, [isUsersSuccess, isEdited, isEditing, users]);
+	}, [isUsersSuccess, isEdited, isEditing, filteredUsers]);
 
 
 	return (

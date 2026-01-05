@@ -7,8 +7,10 @@
 	margin-top: 2px;
 	margin-bottom: 2px;
 	cursor: pointer;
+	transition: opacity 0.2s;
 }
 
+/* Старые классы для обратной совместимости (больше не используются, цвета применяются через inline стили) */
 .color__item__red {
 	background-color: #ef7575;
 }

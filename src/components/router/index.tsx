@@ -7,6 +7,9 @@ import Register from '../../pages/register';
 import Admin from '../../pages/admin';
 import Import from '../../pages/import';
 import DraftTable from '../../pages/import/draft-table';
+import EditWorkspace from '../../pages/edit-workspace';
+import Profile from '../../pages/profile';
+import VerifyEmail from '../../pages/verify-email';
 
 const Router = () => {
 	return (
@@ -18,9 +21,12 @@ const Router = () => {
 					<Route path='admin' element={<Admin />} />
 					<Route path='import' element={<Import />} />
 					<Route path='draft-table' element={<DraftTable />} />
+					<Route path='profile' element={<Profile />} />
+					<Route path='edit-workspace/:id' element={<EditWorkspace />} />
 				</Route>
 				<Route path='login' element={<Login />} />
 				<Route path='register' element={<Register />} />
+				<Route path='verify-email/:token' element={<VerifyEmail />} />
 			</Routes>
 		</>
 	);

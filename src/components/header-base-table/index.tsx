@@ -145,6 +145,7 @@ const HeaderBaseTable = ({ user, selectedRows, openModal, setOpenModal, handleCl
 						value={activeList}
 						exclusive
 						disabled={isEditing}
+						sx={{overflowX: 'scroll'}}
 					>
 						{dataLists && dataLists.map((list) => (
 							<ToggleButton key={list._id} value={list} className={styles.toggle__button}>

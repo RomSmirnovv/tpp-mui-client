@@ -52,6 +52,7 @@ export const userApi = createApi({
 				url: 'user',
 				method: 'PATCH',
 				body,
+				credentials: 'include',
 			}),
 			invalidatesTags: ['User'],
 		}),
@@ -60,6 +61,7 @@ export const userApi = createApi({
 				url: 'user',
 				method: 'POST',
 				body,
+				credentials: 'include',
 			}),
 			invalidatesTags: ['User'],
 		}),
@@ -67,6 +69,7 @@ export const userApi = createApi({
 			query: (id) => ({
 				url: `user/${id}`,
 				method: 'DELETE',
+				credentials: 'include',
 			}),
 			invalidatesTags: ['User'],
 		})

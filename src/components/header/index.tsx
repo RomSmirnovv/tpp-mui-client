@@ -103,18 +103,25 @@ const Header = ({ user }: Props) => {
 		
 		// Получаем workspaceId текущего пользователя
 		let currentWorkspaceId = currentUser.workspaceId;
-		if (typeof currentWorkspaceId === 'object') {
+		if (currentWorkspaceId && typeof currentWorkspaceId === 'object') {
 			currentWorkspaceId = currentWorkspaceId._id || currentWorkspaceId.toString();
-		} else {
+		} else if (currentWorkspaceId != null) {
 			currentWorkspaceId = currentWorkspaceId.toString();
+		} else {
+			// Если у текущего пользователя нет workspaceId - возвращаем пустой список
+			return [];
 		}
 		
 		// Фильтруем пользователей по workspaceId
 		return users.filter(u => {
 			let userWorkspaceId = u.workspaceId;
+			if (!userWorkspaceId) {
+				// Пользователь без workspaceId не попадает в список
+				return false;
+			}
 			if (typeof userWorkspaceId === 'object') {
 				userWorkspaceId = userWorkspaceId._id || userWorkspaceId.toString();
-			} else if (userWorkspaceId) {
+			} else {
 				userWorkspaceId = userWorkspaceId.toString();
 			}
 			return userWorkspaceId === currentWorkspaceId;

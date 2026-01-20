@@ -34,7 +34,8 @@ const AddUserModal = ({ open = false, handleClose = () => { } }) => {
 			login: data.get('login') as string,
 			password: data.get('password') as string,
 			role: Number(data.get('role')) as number,
-			bithDate: dayjs(data.get('birthDate') as string).format('DD.MM.YYYY') as string,
+			// ВАЖНО: сервер ожидает поле birthDate
+			birthDate: dayjs(data.get('birthDate') as string).format('DD.MM.YYYY') as string,
 		}
 		try {
 			await createUser(newUser as any).unwrap();

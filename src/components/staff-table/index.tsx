@@ -17,24 +17,38 @@ const StaffTable = () => {
 
 	// Фильтруем пользователей по workspaceId текущего пользователя
 	const filteredUsers = useMemo(() => {
-		if (!users || !currentUser?.workspaceId) return [];
-		
-		// Получаем workspaceId текущего пользователя
-		let currentWorkspaceId = currentUser.workspaceId;
+		// Если нет списка пользователей или текущий пользователь не определён — ничего не показываем
+		if (!users || !currentUser || !currentUser.workspaceId) return [];
+
+		// Получаем workspaceId текущего пользователя в строковом виде, безопасно обрабатывая null / объект
+		let currentWorkspaceId: any = currentUser.workspaceId;
+
+		if (!currentWorkspaceId) return [];
+
 		if (typeof currentWorkspaceId === 'object') {
-			currentWorkspaceId = currentWorkspaceId._id || currentWorkspaceId.toString();
+			// Возможные варианты: { _id: '...' } или ObjectId
+			const objId = (currentWorkspaceId as any)._id;
+			if (!objId) return [];
+			currentWorkspaceId = objId.toString();
 		} else {
 			currentWorkspaceId = currentWorkspaceId.toString();
 		}
-		
+
 		// Фильтруем пользователей по workspaceId
-		return users.filter(u => {
-			let userWorkspaceId = u.workspaceId;
+		return users.filter((u: any) => {
+			let userWorkspaceId: any = u.workspaceId;
+
+			// Если у пользователя нет workspaceId — не включаем его
+			if (!userWorkspaceId) return false;
+
 			if (typeof userWorkspaceId === 'object') {
-				userWorkspaceId = userWorkspaceId._id || userWorkspaceId.toString();
-			} else if (userWorkspaceId) {
+				const objId = (userWorkspaceId as any)._id;
+				if (!objId) return false;
+				userWorkspaceId = objId.toString();
+			} else {
 				userWorkspaceId = userWorkspaceId.toString();
 			}
+
 			return userWorkspaceId === currentWorkspaceId;
 		});
 	}, [users, currentUser?.workspaceId]);

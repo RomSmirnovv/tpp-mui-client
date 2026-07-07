@@ -26,7 +26,6 @@ import { useMemo } from 'react';
 import { io } from 'socket.io-client';
 import { Howl, Howler } from "howler";
 import notificationVoice from '../../assets/voices/notification.mp3'
-import { BASE_URL } from '../../config';
 import GroupIcon from '@mui/icons-material/Group';
 import { useGetAllUsersQuery, useGetUserQuery } from '../../redux/api/userApi';
 
@@ -47,7 +46,7 @@ type Props = {
 	user: any
 }
 
-const socket = io(BASE_URL);
+const socket = io(window.location.origin);
 
 const Header = ({ user }: Props) => {
 	const { data: currentUser } = useGetUserQuery(null);

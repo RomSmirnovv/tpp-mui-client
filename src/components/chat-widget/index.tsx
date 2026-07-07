@@ -12,10 +12,9 @@ import { IUser } from '../../redux/api/types';
 import Messages from './messages';
 import Rooms from './rooms/index.tsx';
 import SendMessage from './sendMessage/index.tsx';
-import { BASE_URL } from '../../config.ts';
 import { useGetUserQuery } from '../../redux/api/userApi.ts';
 
-const socketChat = io(BASE_URL);
+const socketChat = io(window.location.origin);
 
 type Props = {
 	user: IUser
